@@ -1,0 +1,13 @@
+Planned features and fixes:
+- add mass.... methods
+- reimplement storage of data using IndexedDB instead of LocalStorage
+- fix saving active data at all times
+- save column width
+- always validate API connectivity before any request
+- add filter based on the last request status
+- some requests althoug failed, are interpreted as success -> investigate
+- add preview request response for IMPORT and PULL
+- add generic REST API import dialog
+- add preprocessing steps both for IMPORT and PULL
+- add cancel request for running request
+- fix the problem that the filter disapears when adding new column in a filtered view

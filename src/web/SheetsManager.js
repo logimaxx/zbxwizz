@@ -50,39 +50,32 @@ class SheetsManager {
         this.#tabsContainer = $(tabsContainer);
     }
 
-    init() {
-        
-        // load saved config
+    async init() {
+        await appStorage.ready;
+        await appStorage.migrateSheetsFromLocalStorage();
+
         let config;
         try {
-            config = JSON.parse(localStorage.getItem("worksheets"));
+            config = await appStorage.get("worksheets");
             config = config ? config : {};
         } catch (e) {
             log('No saved ws config');
             config = {};
         }
-        // log(config);
 
         this.lastAssignedIdx = config.lastAssignedIdx ? config.lastAssignedIdx : 0;
-        //this.#activeSheetName = config.activeSheet ? config.activeSheet : null;
 
         this.#tabsContainer.empty();
-        //this.#sheetsContainer.empty();
 
-
-        // render sheets
-        (config.sheets ? config.sheets : []).forEach((sheetName) => {
-            // load sheet data
+        for (const sheetName of (config.sheets ? config.sheets : [])) {
             try {
-                let wsData = JSON.parse(localStorage.getItem("sheet-"+sheetName + "-data"));
-                // log(sheetName,wsData);
+                let wsData = await appStorage.get("sheet-"+sheetName + "-data");
                 this.new_sheet(sheetName, wsData);
             } catch (e) {
                 this.new_sheet(sheetName);
                 log('Invalid sheet data', e);
             }
-        });
-
+        }
 
         if(config.activeSheet) this.activate_sheet(config.activeSheet);
     }
@@ -112,17 +105,14 @@ class SheetsManager {
 
     }
 
-    save() {
+    async save() {
         let cfg = {
             sheets: this.#sheetsOrder,
             lastAssignedIdx: this.lastAssignedIdx,
             activeSheet: this.#activeSheetName
         };
-        // log("save cfg",cfg)
-        localStorage.setItem("worksheets", JSON.stringify(cfg));
-        Object.entries(this.sheets).forEach(([name,sheet])=>{
-            sheet.save();
-        });
+        await appStorage.set("worksheets", cfg);
+        await Promise.all(Object.entries(this.sheets).map(([, sheet]) => sheet.save()));
     }
 
     update_stats() {
@@ -256,10 +246,11 @@ class SheetsManager {
         log("RENAMING SHEET",oldName,newName,this)
         this.sheets[newName] = this.sheets[oldName];
         const sheetId = this.sheets[newName].id;
-        this.sheets[newName].rename(newName).save();
+        this.sheets[newName].rename(newName);
         this.sheetsNames[this.sheetsNames.indexOf(oldName)] = newName;
         delete this.sheets[oldName];
         $("#"+sheetId+"-tab").text(newName).attr("data-sheet",newName);
+        this.save();
         return this.activate_sheet(newName);
     }
 

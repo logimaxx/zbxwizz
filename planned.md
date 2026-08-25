@@ -1,7 +1,6 @@
 Planned features and fixes:
 - Operation/method field in PUSH should be contextual, based on selected resource and based on the Zabbix version
   - quick workaround until feature is implemented: replace the HTML select with a smart select which allows the possibility to add new options on the fly
-- reimplement storage of data using IndexedDB instead of LocalStorage
 - fix saving active data at all times
 - save column width
 - always validate API connectivity before any request

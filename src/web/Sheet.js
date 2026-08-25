@@ -419,8 +419,7 @@ class Sheet {
             fields: this.#fields,
         };
 
-        localStorage.setItem("sheet-"+this.#name+"-data",JSON.stringify(data));
-        return this;
+        return appStorage.set("sheet-"+this.#name+"-data", data).then(() => this);
     }
     /**
      * 
@@ -701,8 +700,9 @@ class Sheet {
     }
 
     rename(new_name) {
-        localStorage.removeItem("sheet-"+this.#name+"-data");
+        const oldKey = "sheet-"+this.#name+"-data";
         this.#name = new_name;
+        appStorage.remove(oldKey);
         return this;
     }
 
@@ -715,7 +715,7 @@ class Sheet {
 
     remove() {
         this.#container.remove();
-        localStorage.removeItem("sheet-"+this.#name+"-data");
+        appStorage.remove("sheet-"+this.#name+"-data");
     }
     
 

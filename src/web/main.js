@@ -821,14 +821,23 @@ function save_session(stop=false) {
         clearTimeout(_sessionSaveTimer);
         _sessionSaveTimer = null;
     }
-    if (typeof sheetManager !== "undefined" && sheetManager)
-        sheetManager.save();
+    if (typeof sheetManager !== "undefined" && sheetManager) {
+        const p = sheetManager.save();
+        if (p && typeof p.catch === "function")
+            p.catch((e) => log("save_session failed", e));
+    }
     newUnsavedData = false;
 }
 
-window.addEventListener("beforeunload", () => {
+function flush_session_save() {
     if (newUnsavedData && typeof sheetManager !== "undefined" && sheetManager)
-        sheetManager.save();
+        save_session(true);
+}
+
+window.addEventListener("beforeunload", flush_session_save);
+document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "hidden")
+        flush_session_save();
 });
 
 
@@ -910,15 +919,21 @@ function download_string(filename, mime, text) {
  *
  */
 function save_env() {
-    prompt_modal("Enter file name to save",(filename)=>{
+    prompt_modal("Enter file name to save", async (filename)=>{
         if(!filename) return;
         try {
+            const worksheets = await appStorage.get("worksheets");
+            if (!worksheets || !worksheets.sheets) {
+                throw new Error("No worksheets saved");
+            }
             let data = {
-                    worksheets: obj(localStorage.getItem("worksheets")),
+                    worksheets: worksheets,
                     sheets: {},
                     name: filename
             };
-            data.worksheets.sheets.forEach(s=>data.sheets[s]=obj(localStorage.getItem(`sheet-${s}-data`)));
+            for (const s of data.worksheets.sheets) {
+                data.sheets[s] = await appStorage.get(`sheet-${s}-data`);
+            }
             download_string(data.name+".json","application/json",json(data));
         }
         catch(e) {
@@ -938,21 +953,21 @@ function load_env(form,modal) {
     let fr = new FileReader();
     fr.addEventListener(
         "load",
-        () => {
-            // this will then display a text file
+        async () => {
             try {
                 let data = obj(fr.result);
-                // cleanup localstorage
-                Object.keys(localStorage).filter(k=>k.match(/^sheet-.*-data$/)).forEach(k=>localStorage.removeItem(k));
-                // load  new data
-                localStorage.setItem("worksheets",json(data.worksheets));
-                Object.keys(data.sheets).forEach(s=>localStorage.setItem("sheet-"+s+"-data",json(data.sheets[s])));
-                // reload app
+                await appStorage.clearSheetKeys();
+                await appStorage.set("worksheets", data.worksheets);
+                for (const s of Object.keys(data.sheets || {})) {
+                    await appStorage.set("sheet-"+s+"-data", data.sheets[s]);
+                }
+                localStorage.setItem(AppStorage.MIGRATE_FLAG, "1");
                 window.location.reload();
-                modal.modal("hide");
+                if (modal && modal.modal) modal.modal("hide");
             }
             catch (e) {
                 log(e);
+                alert_modal("Error loading environment: " + (e.message || e));
             }
         },
         false,
@@ -1340,9 +1355,15 @@ let zbx;
 zbx_connect();
 var sheetManager = new SheetsManager('#worksheets', '#sheetSelector');
 overlay.show("Loading sheets...");
-$(document).ready(()=>{
-    sheetManager.init();
-    overlay.hide();
+$(document).ready(async ()=>{
+    try {
+        await sheetManager.init();
+    } catch (e) {
+        log(e);
+        alert_modal("Failed to load saved sheets: " + (e && e.message ? e.message : e));
+    } finally {
+        overlay.hide();
+    }
 });
 
 $("#sheetSelector").sortable({

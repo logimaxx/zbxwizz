@@ -333,7 +333,7 @@ class Row {
      */
     unset_error() {
         this.#el.removeClass("error");
-        this.hasError = true;
+        this.hasError = false;
     }
 
     /**

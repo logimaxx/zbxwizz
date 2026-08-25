@@ -137,15 +137,7 @@ class ZBXApi {
 
 	async req(method,params,async=false) {
 		
-		let execParams = {};
-		if(typeof params.limit !== "undefined" && params.limit===null)
-			delete params.limit;
-
-		if(method.match(/get$/i)) {
-			execParams.limit = 5;
-		}
-		
-		execParams = Object.assign(execParams,params);
+		let execParams = Object.assign({}, params || {});
 		Object.keys(execParams).forEach(key=>{
 			if(execParams[key]===undefined || execParams[key]===null)
 				delete execParams[key];

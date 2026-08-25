@@ -2,19 +2,17 @@
 
 ZbxWizz is a spreadsheet-style client for the Zabbix API. Import configuration (or CSV/XLS), transform it with JavaScript, chart or export it, and push create/update/delete operations back to Zabbix — all in the browser.
 
-**Full guides (recommended):** [https://zbxwizz.app/docs/](https://zbxwizz.app/docs/)
-
 | Guide | Topics |
 |-------|--------|
-| [Getting started](https://zbxwizz.app/docs/getting-started) | Connect → import → transform → push |
-| [Installation](https://zbxwizz.app/docs/installation) | Deploy beside Zabbix UI or try locally |
-| [User interface](https://zbxwizz.app/docs/user-interface) | Menus, sheets, filters, IndexedDB |
-| [Import & export](https://zbxwizz.app/docs/import-export) | Zabbix / CSV / XLS / JS · CSV · charts |
-| [Zabbix operations](https://zbxwizz.app/docs/zabbix-operations) | Pull, Push, query modes, safety |
-| [Transformations](https://zbxwizz.app/docs/transformations) | Expression context and helpers |
-| [Examples](https://zbxwizz.app/docs/examples) | Copy-paste recipes |
+| [Getting started](getting-started.md) | Connect → import → transform → push |
+| [Installation](installation.md) | Deploy beside Zabbix UI or try locally |
+| [User interface](user-interface.md) | Menus, sheets, filters, IndexedDB |
+| [Import & export](import-export.md) | Zabbix / CSV / XLS / JS · CSV · charts |
+| [Zabbix operations](zabbix-operations.md) | Pull, Push, query modes, safety |
+| [Transformations](transformations.md) | Expression context and helpers |
+| [Examples](examples.md) | Copy-paste recipes |
 
-Sources live in this repository under [`docs/`](https://github.com/logimaxx/zbxwizz/tree/main/docs).
+Online mirror: [https://zbxwizz.app/docs/](https://zbxwizz.app/docs/). Sources: [`docs/`](https://github.com/logimaxx/zbxwizz/tree/main/docs).
 
 ---
 

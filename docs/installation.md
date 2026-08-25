@@ -28,11 +28,11 @@ Serving ZbxWizz from the same web root as the Zabbix UI is the best production s
    npm install
    ```
 
-2. Copy the app into your Zabbix web root **preserving the folder layout** (`src/web` must stay two levels above `node_modules`):
+2. Copy the app into your Zabbix web root **preserving the folder layout** (`src/web` must stay two levels above `node_modules`, and `docs/` next to `src/` for in-app Help):
 
    ```bash
    sudo mkdir -p /usr/share/zabbix/zbxwizz
-   sudo cp -a src node_modules index.html /usr/share/zabbix/zbxwizz/
+   sudo cp -a src docs node_modules index.html /usr/share/zabbix/zbxwizz/
    ```
 
    Adjust the destination to match your install:

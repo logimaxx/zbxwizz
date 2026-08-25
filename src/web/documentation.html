@@ -5,18 +5,242 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ZbxWizz Documentation</title>
     <link rel="stylesheet" href="../../node_modules/bootstrap/dist/css/bootstrap.min.css">
-    
+    <style>
+        :root {
+            --docs-nav-width: 220px;
+            --docs-bg: #f7f8fa;
+            --docs-border: #dde1e6;
+        }
+        html, body {
+            height: 100%;
+            margin: 0;
+        }
+        body {
+            display: flex;
+            flex-direction: column;
+            background: var(--docs-bg);
+        }
+        .docs-layout {
+            display: flex;
+            flex: 1;
+            min-height: 0;
+        }
+        .docs-nav {
+            width: var(--docs-nav-width);
+            flex-shrink: 0;
+            border-right: 1px solid var(--docs-border);
+            background: #fff;
+            overflow-y: auto;
+            padding: 1rem 0.75rem;
+        }
+        .docs-nav h2 {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            color: #6c757d;
+            margin: 0 0 0.75rem 0.5rem;
+        }
+        .docs-nav a {
+            display: block;
+            padding: 0.4rem 0.5rem;
+            border-radius: 4px;
+            color: #343a40;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+        .docs-nav a:hover {
+            background: #eef1f4;
+        }
+        .docs-nav a.active {
+            background: #e3f0ff;
+            color: #0d47a1;
+            font-weight: 600;
+        }
+        .docs-main {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1.25rem 1.5rem 2rem;
+            background: #fff;
+        }
+        .docs-content {
+            max-width: 52rem;
+        }
+        .docs-content h1 { font-size: 1.75rem; margin-bottom: 1rem; }
+        .docs-content h2 { font-size: 1.35rem; margin-top: 1.75rem; border-bottom: 1px solid var(--docs-border); padding-bottom: 0.35rem; }
+        .docs-content h3 { font-size: 1.15rem; margin-top: 1.25rem; }
+        .docs-content pre {
+            background: #f4f6f8;
+            border: 1px solid var(--docs-border);
+            border-radius: 4px;
+            padding: 0.75rem 1rem;
+            overflow-x: auto;
+        }
+        .docs-content code {
+            font-size: 0.9em;
+        }
+        .docs-content pre code {
+            background: transparent;
+            padding: 0;
+        }
+        .docs-content :not(pre) > code {
+            background: #f0f2f5;
+            padding: 0.1em 0.35em;
+            border-radius: 3px;
+        }
+        .docs-content table {
+            width: 100%;
+            margin: 1rem 0;
+            border-collapse: collapse;
+        }
+        .docs-content th,
+        .docs-content td {
+            border: 1px solid var(--docs-border);
+            padding: 0.45rem 0.65rem;
+            text-align: left;
+            vertical-align: top;
+        }
+        .docs-content th {
+            background: #f4f6f8;
+        }
+        .docs-content blockquote {
+            border-left: 3px solid #adb5bd;
+            margin-left: 0;
+            padding-left: 1rem;
+            color: #495057;
+        }
+        .docs-error {
+            color: #721c24;
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            border-radius: 4px;
+            padding: 0.75rem 1rem;
+        }
+        @media (max-width: 720px) {
+            .docs-layout { flex-direction: column; }
+            .docs-nav {
+                width: 100%;
+                border-right: none;
+                border-bottom: 1px solid var(--docs-border);
+                max-height: 40vh;
+            }
+        }
+    </style>
 </head>
 <body>
-    <div class="container-fluid"></div>
+    <div class="docs-layout">
+        <nav class="docs-nav" aria-label="Documentation">
+            <h2>Guides</h2>
+            <div id="docs-nav-links"></div>
+        </nav>
+        <main class="docs-main">
+            <article id="docs-content" class="docs-content"></article>
+        </main>
+    </div>
     <script src="../../node_modules/marked/marked.min.js"></script>
     <script src="../../node_modules/jquery/dist/jquery.min.js"></script>
     <script>
-        $.get('../../docs/documentation.md', function(markdown) {
-            const html = marked.parse(markdown);
-            document.querySelector('.container-fluid').innerHTML = html;
+        const DOCS_BASE = '../../docs/';
+        const PAGES = [
+            { file: 'documentation.md', title: 'Overview' },
+            { file: 'getting-started.md', title: 'Getting started' },
+            { file: 'installation.md', title: 'Installation' },
+            { file: 'user-interface.md', title: 'User interface' },
+            { file: 'import-export.md', title: 'Import & export' },
+            { file: 'zabbix-operations.md', title: 'Zabbix operations' },
+            { file: 'transformations.md', title: 'Transformations' },
+            { file: 'examples.md', title: 'Examples' },
+        ];
+
+        const $nav = $('#docs-nav-links');
+        const $content = $('#docs-content');
+        let currentFile = '';
+
+        PAGES.forEach(function (page) {
+            $('<a>')
+                .attr('href', '#' + page.file)
+                .attr('data-file', page.file)
+                .text(page.title)
+                .appendTo($nav);
         });
+
+        function pageFromHash() {
+            const raw = (location.hash || '').replace(/^#/, '');
+            const file = raw.split('#')[0] || 'documentation.md';
+            const known = PAGES.some(function (p) { return p.file === file; });
+            return known ? file : 'documentation.md';
+        }
+
+        function setActiveNav(file) {
+            $nav.find('a').removeClass('active');
+            $nav.find('a[data-file="' + file + '"]').addClass('active');
+        }
+
+        function loadPage(file) {
+            if (currentFile === file && $content.children().length) {
+                return;
+            }
+            currentFile = file;
+            setActiveNav(file);
+            $content.html('<p class="text-muted">Loading…</p>');
+
+            $.get(DOCS_BASE + file)
+                .done(function (markdown) {
+                    $content.html(marked.parse(markdown));
+                    document.title = (PAGES.find(function (p) { return p.file === file; }) || {}).title
+                        + ' · ZbxWizz Documentation';
+                    const hashParts = location.hash.replace(/^#/, '').split('#');
+                    const anchor = hashParts[1];
+                    if (anchor) {
+                        const el = document.getElementById(anchor)
+                            || document.querySelector('[name="' + CSS.escape(anchor) + '"]');
+                        if (el) {
+                            el.scrollIntoView();
+                            return;
+                        }
+                    }
+                    $content.closest('.docs-main')[0].scrollTop = 0;
+                })
+                .fail(function () {
+                    $content.html(
+                        '<div class="docs-error">' +
+                        '<strong>Could not load local docs.</strong> ' +
+                        'Expected <code>' + DOCS_BASE + file + '</code>. ' +
+                        'Deploy the repository <code>docs/</code> folder next to <code>src/</code> ' +
+                        '(see Installation).' +
+                        '</div>'
+                    );
+                });
+        }
+
+        $(window).on('hashchange', function () {
+            loadPage(pageFromHash());
+        });
+
+        $content.on('click', 'a[href]', function (event) {
+            const href = $(this).attr('href') || '';
+            if (/^https?:\/\//i.test(href) || href.startsWith('mailto:')) {
+                return;
+            }
+            if (href.startsWith('#')) {
+                return;
+            }
+
+            const match = href.match(/^([^?#]+\.md)(#[^?]*)?(\?.*)?$/i);
+            if (!match) {
+                return;
+            }
+
+            event.preventDefault();
+            const file = match[1].split('/').pop();
+            const anchor = match[2] || '';
+            location.hash = file + anchor;
+        });
+
+        if (!location.hash) {
+            location.replace('#' + pageFromHash());
+        } else {
+            loadPage(pageFromHash());
+        }
     </script>
-    
 </body>
 </html>

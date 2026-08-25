@@ -31,8 +31,8 @@ async function import_from_api (sheet,resource, tpl){
         try {
             tpl = eval("`" + tpl + "`");
             params = JSON.parse(tpl);
-            if(typeof params.limit === "undefined")
-                params.limit = null;
+            const explicitLimit = typeof params.limit === "number";
+            const usedLimit = explicitLimit ? params.limit : 5;
 
             zbx.get(resource, params)
                 .then((data) => {
@@ -63,6 +63,13 @@ async function import_from_api (sheet,resource, tpl){
                      * @type {Sheet}
                      */
                     sheet.reset().load_data(data.fields, data.records,'csv');
+                    if (data.records.length === usedLimit) {
+                        normal_modal({
+                            body: explicitLimit
+                                ? `Import returned exactly ${usedLimit} rows (request <code>limit</code>). There may be more — raise <code>limit</code> if needed.`
+                                : `Import returned ${usedLimit} rows using the default safety <code>limit</code>. Set a numeric <code>limit</code> in the request template to fetch more. Omitting it avoids accidentally pulling an entire large Zabbix dataset.`
+                        });
+                    }
                     resolve(data);
                 })
                 .catch(e=>{

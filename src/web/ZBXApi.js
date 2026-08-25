@@ -143,6 +143,11 @@ class ZBXApi {
 				delete execParams[key];
 
 		});
+		// Safety default: unbounded .get can overwhelm large Zabbix deployments.
+		// Callers must set an explicit numeric limit to fetch more than 5 rows.
+		if(method.match(/get$/i) && typeof execParams.limit === "undefined") {
+			execParams.limit = 5;
+		}
 		// console.log(execParams);
 		if(async) {
 			

@@ -1,6 +1,6 @@
 # Import & export
 
-Bring data into the active sheet, then export CSV or chart frequencies. Writing back to Zabbix is covered in [Zabbix operations](zabbix-operations.md).
+Bring data into sheets, then export CSV or XLS, or chart frequencies. Writing back to Zabbix is covered in [Zabbix operations](zabbix-operations.md).
 
 ---
 
@@ -89,7 +89,7 @@ Tips:
 - Each selected Excel sheet becomes a ZbxWizz sheet with the same name
 - Optional: overwrite/reset the existing workbook first
 
-Useful for round-trips with Excel after a CSV export, or for onboarding inventories maintained as spreadsheets.
+Useful for round-trips with Excel, or for onboarding inventories maintained as spreadsheets.
 
 ---
 
@@ -130,7 +130,22 @@ Use this for synthetic test data or reshaping sources before they hit the table.
 | Only selected | Checked rows |
 | Only visible | Rows passing all filters |
 
-You can also restrict which columns are exported. Output uses Papa Parse (quoted fields, header row). Values export as shown in the table (string form).
+You can also restrict which columns are exported. Output uses Papa Parse (quoted fields, header row). Values export as shown in the table (string form). CSV always exports the **active sheet** only.
+
+---
+
+## Export to XLS
+
+**Data → Export to XLS**
+
+Builds a single `.xlsx` workbook (SheetJS) with one Excel worksheet per selected ZbxWizz sheet:
+
+| Option | Behaviour |
+|--------|-----------|
+| Sheets | Multi-select; all sheets selected by default |
+| All / selected / visible records | Same row filters as CSV, applied **per sheet** |
+
+All columns of each sheet are included (header row even if a sheet has no rows). Sheet names are sanitized to Excel limits (31 characters; invalid characters replaced).
 
 ---
 
@@ -170,4 +185,3 @@ Select a template and remove it from the dialog when you no longer need it.
 ## Not yet available
 
 - Export JSON of the sheet alone (use **Environment → Save** for a full workbook export)
-- Excel export (import XLS is supported; export remains CSV for now)

@@ -11,7 +11,7 @@ Typical flow:
   Edit sheet (filter · transform · pull)
             │
             ▼
-  Export (CSV / charts)  or  Push to Zabbix
+  Export (CSV / XLS / charts)  or  Push to Zabbix
 ```
 
 ---

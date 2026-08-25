@@ -9,14 +9,14 @@ ZbxWizz presents data as a multi-sheet workbook. Each sheet is an independent ta
 | Menu | What it does |
 |------|----------------|
 | **Environment** | **New** workspace · **Save** / **Load** workbook `.json` |
-| **Data** | Import CSV / XLS / Zabbix / JavaScript · Export CSV · Chart data |
+| **Data** | Import CSV / XLS / Zabbix / JavaScript · Export CSV / XLS · Chart data |
 | **Table ops** | Add rows · Reorder columns |
 | **Zabbix ops** | **Pull** (enrich rows) · **Push** (create / update / delete) |
 | **Tools** | Script editor (advanced JavaScript) |
 | **Help** | In-app documentation · Zabbix API docs · Contact |
 | **Zabbix logo** | API URL, token, and bulk query mode |
 
-Footer: sheet tabs, **New sheet** / **Remove current sheet**, save icon, and **Total / Selected / Visible** counters.
+Footer: sheet tabs, **New sheet**, save icon, and **Total / Selected / Visible** counters.
 
 ---
 
@@ -63,13 +63,13 @@ Filters matter for transforms and for “select all visible”: expressions and 
 ## Sheets
 
 - **Click** a tab to switch sheets
-- **Double-click** a tab to rename it
-- **[+]** New sheet · **[-]** Remove current sheet
+- **Tab menu** (caret on the tab, or right-click): **Rename**, **Duplicate**, **Delete**
+- **[+]** New sheet
 - Tabs can be **drag-reordered**
 
 Each sheet has its own data and filters. Cross-sheet lookups in transforms use `ws.sheetName` (see [Transformations](transformations.md)).
 
-From the table hamburger you can **copy visible** or **copy selected** rows into a new sheet.
+From the table hamburger you can **copy visible** or **copy selected** rows into a new sheet. **Duplicate** on the tab menu clones the whole sheet (all rows and columns).
 
 ---
 

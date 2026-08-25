@@ -4,11 +4,11 @@
     --border: #d0d7de;
     --text: #1f2328;
     --muted: #656d76;
-    --accent: #0d9488;
-    --accent-hover: #0f766e;
-    --accent-soft: #ccfbf1;
-    --header: #0f766e;
-    --footer: #134e4a;
+    --accent: #2563eb;
+    --accent-hover: #1d4ed8;
+    --accent-soft: #dbeafe;
+    --header: #1e3a5f;
+    --footer: #152238;
     --success-bg: #e6f6ed;
     --success-fg: #116329;
     --error-bg: #fff1e5;
@@ -17,7 +17,7 @@
     --warn-fg: #9a6700;
     --edit-bg: #0f172a;
     --edit-fg: #e2e8f0;
-    --selected-row: #e6f7f5;
+    --selected-row: #e8f0fe;
     --hover-row: #eef2f5;
     --shadow: 0 8px 24px rgba(15, 23, 42, 0.12);
     --font-sans: "IBM Plex Sans", "Segoe UI", sans-serif;
@@ -240,14 +240,14 @@ table td {
 footer.footer {
     background: var(--footer) !important;
     border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
-    color: #e6fffa;
+    color: #e8eef5;
 }
 footer .nav-link {
-    color: #e6fffa;
+    color: #e8eef5;
 }
 footer .badge-light {
     background: rgba(255, 255, 255, 0.12);
-    color: #e6fffa;
+    color: #e8eef5;
     font-weight: 500;
 }
 footer .badge-secondary,
@@ -263,16 +263,6 @@ footer .addremove.btn-info {
 footer .addremove.btn-info:hover {
     background: var(--accent-hover);
     border-color: var(--accent-hover);
-}
-footer .addremove.btn-danger {
-    background: transparent;
-    border-color: rgba(255, 255, 255, 0.35);
-    color: #fecaca;
-}
-footer .addremove.btn-danger:hover {
-    background: rgba(239, 68, 68, 0.25);
-    border-color: #fca5a5;
-    color: #fff;
 }
 
 #actionMenu .dropdown {
@@ -315,7 +305,7 @@ footer .addremove.btn-danger:hover {
     word-wrap: break-word;
     outline: 2px solid var(--accent);
     outline-offset: -2px;
-    box-shadow: inset 0 0 0 1px rgba(13, 148, 136, 0.4);
+    box-shadow: inset 0 0 0 1px rgba(37, 99, 235, 0.4);
 }
 .dataTable tbody td.active {
     background: var(--accent);
@@ -518,30 +508,63 @@ footer .addremove.btn-danger:hover {
 }
 
 /* ---- Sheet tabs ---- */
-#sheetSelector .nav-item .removesheet {
-    display: none;
-}
-#sheetSelector .nav-item:hover .removesheet {
-    display: inline;
-}
-#sheetSelector .nav-link {
-    color: rgba(255, 255, 255, 0.75) !important;
-    background: transparent;
+#sheetSelector .sheet-tab {
+    display: inline-flex;
+    align-items: stretch;
     border-radius: var(--radius);
     border: 1px solid transparent;
-    padding: 0.2rem 0.55rem !important;
-    font-size: 0.8rem;
+    background: transparent;
 }
-#sheetSelector .nav-link.active,
-#sheetSelector .nav-link.active:hover {
-    color: #fff !important;
+#sheetSelector .sheet-tab:hover {
+    background: rgba(255, 255, 255, 0.08);
+}
+#sheetSelector .sheet-tab.active {
     background: rgba(255, 255, 255, 0.12);
     border-color: rgba(255, 255, 255, 0.2);
     box-shadow: inset 0 -2px 0 var(--accent);
 }
+#sheetSelector .nav-link {
+    color: rgba(255, 255, 255, 0.75) !important;
+    background: transparent !important;
+    border: none !important;
+    border-radius: 0;
+    box-shadow: none !important;
+    padding: 0.2rem 0.35rem 0.2rem 0.55rem !important;
+    font-size: 0.8rem;
+}
+#sheetSelector .sheet-tab.active .nav-link,
 #sheetSelector .nav-link:hover {
     color: #fff !important;
-    background: rgba(255, 255, 255, 0.08);
+}
+#sheetSelector .sheet-tab-toggle {
+    appearance: none;
+    border: none;
+    background: transparent;
+    color: rgba(255, 255, 255, 0.55);
+    padding: 0 0.4rem 0 0.15rem;
+    font-size: 0.7rem;
+    line-height: 1;
+    cursor: pointer;
+    border-radius: 0 var(--radius) var(--radius) 0;
+}
+#sheetSelector .sheet-tab-toggle:hover,
+#sheetSelector .sheet-tab.active .sheet-tab-toggle {
+    color: #fff;
+}
+#sheetSelector .sheet-tab-rename-input {
+    width: 7rem;
+    max-width: 30vw;
+    font-size: 0.8rem;
+    padding: 0.15rem 0.35rem;
+    border-radius: var(--radius);
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    background: rgba(0, 0, 0, 0.25);
+    color: #fff;
+}
+#sheetTabMenu {
+    position: fixed;
+    z-index: 2000;
+    min-width: 9rem;
 }
 
 .cols-sort {
@@ -735,7 +758,7 @@ footer .addremove.btn-danger:hover {
 .form-control:focus,
 .custom-select:focus {
     border-color: var(--accent);
-    box-shadow: 0 0 0 0.15rem rgba(13, 148, 136, 0.25);
+    box-shadow: 0 0 0 0.15rem rgba(37, 99, 235, 0.25);
 }
 
 .nav-pills .nav-link.active {

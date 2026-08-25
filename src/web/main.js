@@ -368,29 +368,22 @@ function update_help_link(src){
 }
 
 /**
- * export data in current active sheet to csv
- * @param filter
+ * Trigger a browser download for text or binary content.
+ * @param {Blob|string|ArrayBuffer} content
+ * @param {string} filename
+ * @param {string} [contentType]
  */
+function downloadBlob(content, filename, contentType) {
+    let blob = content instanceof Blob ? content : new Blob([content], {type: contentType});
+    let url = URL.createObjectURL(blob);
+    let pom = document.createElement('a');
+    pom.href = url;
+    pom.setAttribute('download', filename);
+    pom.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
 function save_data(filter=null,columns=null) {
-    /**
-     *
-     * @param content
-     * @param filename
-     * @param contentType
-     */
-    function downloadBlob(content, filename, contentType) {
-        // Create a blob
-        let blob = new Blob([content], {type: contentType});
-        let url = URL.createObjectURL(blob);
-
-        // Create a link to download it
-        let pom = document.createElement('a');
-        pom.href = url;
-        pom.setAttribute('download', filename);
-        pom.click();
-    }
-
-
     let data = sheetManager.get_active_sheet().export(filter,columns);
     let csv = Papa.unparse(data.map(d=>d.flds), {
         quotes: true, //or array of booleans
@@ -403,6 +396,60 @@ function save_data(filter=null,columns=null) {
         columns: null //or array of strings
     });
     downloadBlob(csv, "export.csv", "text/csv;charset=utf-8;");
+}
+
+/**
+ * Sanitize a name for Excel worksheet constraints (max 31 chars, no : \ / ? * [ ]).
+ * @param {string} name
+ * @param {Set<string>} usedNames
+ * @returns {string}
+ */
+function excel_sheet_name(name, usedNames) {
+    let base = String(name || "Sheet").replace(/[:\\/?*\[\]]/g, "_").slice(0, 31) || "Sheet";
+    let n = base;
+    let i = 1;
+    while (usedNames.has(n)) {
+        const suffix = "_" + i++;
+        n = base.slice(0, Math.max(1, 31 - suffix.length)) + suffix;
+    }
+    usedNames.add(n);
+    return n;
+}
+
+/**
+ * Export one or more ZbxWizz sheets to a single .xlsx workbook.
+ * @param {string[]} sheetNames
+ * @param {Function|null} filter
+ */
+function save_xls(sheetNames, filter=null) {
+    if (!sheetNames || !sheetNames.length) {
+        alert_modal("Select at least one sheet to export");
+        return;
+    }
+    const wb = XLSX.utils.book_new();
+    const usedNames = new Set();
+    sheetNames.forEach((name) => {
+        const sheet = sheetManager.sheets[name];
+        if (!sheet) return;
+        const fields = sheet.fields.slice();
+        const rows = sheet.export(filter).map(d => d.flds);
+        let ws;
+        if (rows.length) {
+            ws = XLSX.utils.json_to_sheet(rows, { header: fields.length ? fields : undefined });
+        } else {
+            ws = XLSX.utils.aoa_to_sheet([fields.length ? fields : []]);
+        }
+        XLSX.utils.book_append_sheet(wb, ws, excel_sheet_name(name, usedNames));
+    });
+    if (!wb.SheetNames.length) {
+        alert_modal("No sheets to export");
+        return;
+    }
+    const wbout = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+    downloadBlob(
+        new Blob([wbout], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" }),
+        "export.xlsx"
+    );
 }
 
 
@@ -1137,6 +1184,39 @@ function prompt_save_data() {
     });
 }
 
+function prompt_save_xls() {
+    let $el = $("#exportToXLSDialog").clone();
+    let sheetsSel = $el.find("select[name='sheets']");
+    sheetManager.sheetsNames.forEach((name) => {
+        $("<option selected>").text(name).val(name).appendTo(sheetsSel);
+    });
+
+    dragable_modal({
+        title: "Export XLS",
+        body: $el,
+        buttons: [
+            {
+                text: "Export",
+                action: () => {
+                    let sheetNames = $el.find("select[name=sheets]").val() || [];
+                    let records = $el.find("select[name=records]").val();
+                    switch (records) {
+                        case "selected":
+                            save_xls(sheetNames, row => row.isSelected);
+                            break;
+                        case "visible":
+                            save_xls(sheetNames, row => !row.isHidden);
+                            break;
+                        default:
+                            save_xls(sheetNames, null);
+                    }
+                },
+                class: "primary"
+            }
+        ]
+    });
+}
+
 function open_play_editor(  ) {
     
     let content = $("#scriptPlayer");
@@ -1377,6 +1457,7 @@ $(document).ready(async ()=>{
 });
 
 $("#sheetSelector").sortable({
+    cancel: "input,textarea,button,.dropdown-menu,.sheet-tab-toggle,.sheet-tab-rename-input",
     stop: ()=>sheetManager.reorder()
 });
 

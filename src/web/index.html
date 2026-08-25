@@ -48,6 +48,7 @@
 
                             <div class="dropdown-divider"></div>
                             <a class="dropdown-item" role="button"  href="#" onclick="prompt_save_data()">Export to CSV</a>
+                            <a class="dropdown-item" role="button"  href="#" onclick="prompt_save_xls()">Export to XLS</a>
                             <a class="dropdown-item" role="button" href="#" onclick="chart_modal()">Chart data</a>
                             <!-- <a class="dropdown-item" role="button" onclick="alert_modal('Not yet implemented')">Export JSON</a> -->
                         </div>
@@ -124,7 +125,6 @@
                     </div>
 
                     <button onclick="sheetManager.new_sheet()" class="btn btn-info btn-sm addremove" type="button"><i class="fa fa-plus"></i> <span>New sheet</span></button>
-                    <button onclick="sheetManager.delete_sheet()" class="btn btn-danger btn-sm addremove" type="button"><i class="fa fa-minus"></i><span> Remove current sheet</span></button>
                 </div>
                 <div onclick="sheetManager.update_stats()" style="min-width: 250px !important;">
                     <a href="#" onclick="$ws.scrollTop(0).scrollLeft(0)" title="To top"><i class="fa fa-arrow-up text-white"></i></a>
@@ -162,6 +162,20 @@
                 </div>
             </div>
             
+        </div>
+        <div id="exportToXLSDialog">
+            <div class="form-group">
+                Select sheets to export<br>
+                <select multiple name="sheets" class="custom-select custom-select-sm" size="6"></select>
+            </div>
+            <div class="form-group mb-0">
+                Select records to export<br>
+                <select name="records" class="custom-select custom-select-sm">
+                    <option value="">all records</option>
+                    <option value="selected">only selected</option>
+                    <option value="visible">only visible</option>
+                </select>
+            </div>
         </div>
         <div id="chartDialog">
             <div class="form-row">

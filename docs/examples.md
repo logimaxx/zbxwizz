@@ -216,6 +216,8 @@ return Array.from({length: 10}, (_, i) => ({
 2. **Data → Export to CSV** → only selected
 3. Share the CSV before pushing
 
+To share several sheets at once (e.g. hosts + groups after a bulk edit), use **Data → Export to XLS**, keep the sheets you need selected, and download `export.xlsx`.
+
 ---
 
 ## Export problem / event history

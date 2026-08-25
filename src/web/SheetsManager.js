@@ -13,6 +13,8 @@ class SheetsManager {
     #activeSheetName;
     #sheetsContainer;
     #tabsContainer;
+    #tabMenu;
+    #tabMenuSheet = null;
 
     get s() {
         return this.sheets;
@@ -23,21 +25,12 @@ class SheetsManager {
 
     #sheetContainerTpl = `<div aria-labelledby="" style="display: none"></div>`;
     #sheetSelectorTabTpl = `<li class="nav-item mr-1" role="presentation">
-<!--<div class="btn-group dropup btn-group-sm">-->
-<!--  <button type="button" class="btn btn-danger">Action</button>-->
-<!--  <button type="button" class="btn btn-danger dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-expanded="false">-->
-<!--    <span class="sr-only">Toggle Dropdown</span>-->
-<!--  </button>-->
-<!--  <div class="dropdown-menu">-->
-<!--    <a class="dropdown-item" href="#">Action</a>-->
-<!--    <a class="dropdown-item" href="#">Another action</a>-->
-<!--    <a class="dropdown-item" href="#">Something else here</a>-->
-<!--    <div class="dropdown-divider"></div>-->
-<!--    <a class="dropdown-item" href="#">Separated link</a>-->
-<!--  </div>-->
-<!--</div>-->
-
-                    <a class="nav-link" ondblclick="edit_tab(this)" onclick="sheetManager.activate_sheet($(this).attr('data-sheet'))"></a>
+                    <div class="sheet-tab">
+                        <a class="nav-link" href="#" role="tab"></a>
+                        <button type="button" class="sheet-tab-toggle" title="Sheet menu" aria-label="Sheet menu" aria-haspopup="true">
+                            <i class="fa fa-caret-up"></i>
+                        </button>
+                    </div>
                     </li>`;
 
     constructor(sheetsContainer, tabsContainer) {
@@ -54,6 +47,92 @@ class SheetsManager {
             let sheet = self.get_active();
             if(sheet) sheet.schedule_virtual_update();
         });
+
+        this.#tabMenu = $(`<div id="sheetTabMenu" class="dropdown-menu" role="menu">
+            <a class="dropdown-item" href="#" data-action="rename" role="menuitem">Rename</a>
+            <a class="dropdown-item" href="#" data-action="duplicate" role="menuitem">Duplicate</a>
+            <div class="dropdown-divider"></div>
+            <a class="dropdown-item text-danger" href="#" data-action="delete" role="menuitem">Delete</a>
+        </div>`).appendTo(document.body);
+
+        this.#tabsContainer
+            .on("click", "a.nav-link", (e) => {
+                e.preventDefault();
+                this.activate_sheet($(e.currentTarget).attr("data-sheet"));
+            })
+            .on("click", ".sheet-tab-toggle", (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                const $a = $(e.currentTarget).closest(".sheet-tab").find("a.nav-link");
+                const sheetName = $a.attr("data-sheet");
+                if (!sheetName) return;
+                this.activate_sheet(sheetName);
+                this.show_tab_menu(sheetName, e.currentTarget);
+            })
+            .on("contextmenu", ".sheet-tab", (e) => {
+                e.preventDefault();
+                const $a = $(e.currentTarget).find("a.nav-link");
+                const sheetName = $a.attr("data-sheet");
+                if (!sheetName) return;
+                this.activate_sheet(sheetName);
+                this.show_tab_menu(sheetName, null, e.clientX, e.clientY);
+            });
+
+        this.#tabMenu.on("click", "a.dropdown-item", (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            const action = $(e.currentTarget).attr("data-action");
+            const sheetName = this.#tabMenuSheet;
+            this.hide_tab_menu();
+            if (!sheetName || !this.sheets[sheetName]) return;
+            if (action === "rename") {
+                const tab = this.#find_tab_link(sheetName);
+                if (tab) edit_tab(tab);
+            } else if (action === "duplicate") {
+                this.duplicate_sheet(sheetName);
+            } else if (action === "delete") {
+                this.delete_sheet(sheetName);
+            }
+        });
+
+        $(document).on("click.sheetTabMenu", (e) => {
+            if (!$(e.target).closest("#sheetTabMenu, .sheet-tab-toggle").length) {
+                this.hide_tab_menu();
+            }
+        });
+        $(window).on("resize.sheetTabMenu scroll.sheetTabMenu", () => this.hide_tab_menu());
+    }
+
+    #find_tab_link(sheetName) {
+        return this.#tabsContainer.find("a.nav-link").filter(function () {
+            return $(this).attr("data-sheet") === sheetName;
+        })[0] || null;
+    }
+
+    show_tab_menu(sheetName, anchorEl, x, y) {
+        this.#tabMenuSheet = sheetName;
+        const menu = this.#tabMenu.addClass("show").css({ left: 0, top: 0, visibility: "hidden" });
+        const mw = menu.outerWidth();
+        const mh = menu.outerHeight();
+
+        if (anchorEl) {
+            const rect = anchorEl.getBoundingClientRect();
+            x = rect.right - mw;
+            y = rect.top - mh - 4;
+            if (y < 4) y = rect.bottom + 4;
+        } else {
+            x = x || 0;
+            y = y || 0;
+        }
+
+        x = Math.max(4, Math.min(x, window.innerWidth - mw - 8));
+        y = Math.max(4, Math.min(y, window.innerHeight - mh - 8));
+        menu.css({ left: x + "px", top: y + "px", visibility: "visible" });
+    }
+
+    hide_tab_menu() {
+        this.#tabMenuSheet = null;
+        this.#tabMenu.removeClass("show").css({ visibility: "" });
     }
 
     async init() {
@@ -92,8 +171,9 @@ class SheetsManager {
             const sheetId = this.sheets[sheetName].id;
             this.#sheetsContainer.children().hide();
             $("#sheetSelector").find("a.nav-link").removeClass("active");
+            $("#sheetSelector").find(".sheet-tab").removeClass("active");
             $("#"+sheetId).show();
-            $("#"+sheetId+"-tab").addClass("active");
+            $("#"+sheetId+"-tab").addClass("active").closest(".sheet-tab").addClass("active");
             if(this.#activeSheetName===sheetName) return ;
             this.#activeSheetName = sheetName;
             let activeSheet = this.get_active();
@@ -163,7 +243,7 @@ class SheetsManager {
 
         // create tab && anpass
         $(this.#sheetSelectorTabTpl).appendTo(this.#tabsContainer)
-            .find("a")
+            .find("a.nav-link")
             .text(sheetName)
             .attr("data-target", sheetId)
             .attr("data-sheet", sheetName)
@@ -190,12 +270,16 @@ class SheetsManager {
         if (!sheetName) {
             sheetName = this.#activeSheetName;
         }
+        if (!sheetName || !this.sheets[sheetName]) {
+            return this;
+        }
+        this.hide_tab_menu();
         const sheetId = this.sheets[sheetName].id;
         // log("delete "+sheetId)
 
         this.sheets[sheetName].remove();
         delete this.sheets[sheetName];
-        $("#"+sheetId+"-tab").parent().remove();
+        $("#"+sheetId+"-tab").closest("li").remove();
         this.reorder();
         this.save();
         log("new list",this.#sheetsOrder);
@@ -211,6 +295,29 @@ class SheetsManager {
         }
 
         return this;
+    }
+
+    /**
+     * Clone a sheet (fields + all rows) into a new uniquely named sheet.
+     * @param {String} sheetName
+     * @returns {Sheet}
+     */
+    duplicate_sheet(sheetName) {
+        const sheet = this.sheets[sheetName];
+        if (!sheet) return null;
+
+        let base = sheetName + " copy";
+        let name = base;
+        let n = 2;
+        while (this.sheets[name]) {
+            name = base + " " + n;
+            n++;
+        }
+
+        return this.new_sheet(name, {
+            fields: sheet.fields.slice(),
+            records: sheet.export()
+        });
     }
 
     /**
@@ -263,7 +370,7 @@ class SheetsManager {
 
     reorder() {
         let newOrder = [];
-        $("#sheetSelector").find("a").toArray().forEach(a=>newOrder.push($(a).attr("data-sheet")));
+        $("#sheetSelector").find("a.nav-link[data-sheet]").toArray().forEach(a=>newOrder.push($(a).attr("data-sheet")));
         log("reorder",newOrder);
         this.#sheetsOrder = newOrder;
         this.save();
@@ -272,12 +379,15 @@ class SheetsManager {
 
 
 function edit_tab(src) {
+    let lnk = $(src);
+    let $toggle = lnk.closest(".sheet-tab").find(".sheet-tab-toggle").hide();
+    let sheetName = lnk.attr("data-sheet") || lnk.text();
     function restore() {
         inp.remove();
-            lnk.css("display","");
+        lnk.css("display", "");
+        $toggle.show();
     }
-    let lnk = $(src).css("display","none");
-    let sheetName = lnk.text();
+    lnk.css("display", "none");
     function rename(event){
         let sheetNewName = inp.val();
         // log(event);
@@ -298,7 +408,7 @@ function edit_tab(src) {
             sheetManager.rename_sheet(sheetName,sheetNewName);
         }
     }
-    let inp = $("<input>").val(sheetName).insertAfter(lnk)
+    let inp = $("<input class=\"sheet-tab-rename-input\">").val(sheetName).insertAfter(lnk)
         .trigger("focus")
         .on("blur",rename)
         .on("keyup",rename)

@@ -7,7 +7,7 @@ ZbxWizz is a spreadsheet-style client for the Zabbix API. Import configuration (
 | [Getting started](getting-started.md) | Connect → import → transform → push |
 | [Installation](installation.md) | Deploy beside Zabbix UI or try locally |
 | [User interface](user-interface.md) | Menus, sheets, filters, IndexedDB |
-| [Import & export](import-export.md) | Zabbix / CSV / XLS / JS · CSV · charts |
+| [Import & export](import-export.md) | Zabbix / CSV / XLS / JS · CSV / XLS · charts |
 | [Zabbix operations](zabbix-operations.md) | Pull, Push, query modes, safety |
 | [Transformations](transformations.md) | Expression context and helpers |
 | [Examples](examples.md) | Copy-paste recipes |
@@ -25,7 +25,7 @@ Online mirror: [https://zbxwizz.app/docs/](https://zbxwizz.app/docs/). Sources: 
          Edit sheet (filter · transform · pull)
                     │
                     ▼
-  Data → Export CSV / Chart    or    Zabbix ops → Push
+  Data → Export CSV / XLS / Chart    or    Zabbix ops → Push
 ```
 
 - Work happens in **sheets** (workbook tabs).

@@ -146,8 +146,21 @@ class Sheet {
      * @returns 
      */
     add_row(fields,record,rowIdx) {
-        // log(rec);
-
+        fields = fields || this.#fields;
+        if (typeof rowIdx !== "number") rowIdx = this.#rows.length;
+        let row = new Row(this, rowIdx, fields, record || {});
+        if (rowIdx >= this.#rows.length) {
+            this.#tbody.append(row.$el);
+            this.#rows.push(row);
+        } else {
+            row.$el.insertBefore(this.#rows[rowIdx].$el);
+            this.#rows.splice(rowIdx, 0, row);
+            for (let i = rowIdx + 1; i < this.#rows.length; i++) {
+                this.#rows[i].renumber(i);
+            }
+        }
+        this.update_stats();
+        save_session(true);
         return row;
     }
     export(filter,columns=null) {
@@ -406,8 +419,7 @@ class Sheet {
             fields: this.#fields,
         };
 
-        localStorage.setItem("sheet-"+this.#name+"-data",JSON.stringify(data));
-        return this;
+        return appStorage.set("sheet-"+this.#name+"-data", data).then(() => this);
     }
     /**
      * 
@@ -618,7 +630,10 @@ class Sheet {
                         else if(data==="hidden")
                             tmp = activeSheet.export(row=>row.isHidden);
                         log(tmp);
-                        sheetManager.new_sheet(tmp);
+                        sheetManager.new_sheet(null, {
+                            fields: activeSheet.fields,
+                            records: tmp
+                        });
                         
                         //alert_modal("Not yet implemented");
                     }
@@ -663,6 +678,8 @@ class Sheet {
                     sheet.#tbody.append(row.$el);
                     sheet.rows.push(row);
                 }
+                sheet.update_stats();
+                save_session(true);
                 modal.remove();
             });
         let sheet = this;
@@ -683,8 +700,9 @@ class Sheet {
     }
 
     rename(new_name) {
-        localStorage.removeItem("sheet-"+this.#name+"-data");
+        const oldKey = "sheet-"+this.#name+"-data";
         this.#name = new_name;
+        appStorage.remove(oldKey);
         return this;
     }
 
@@ -697,7 +715,7 @@ class Sheet {
 
     remove() {
         this.#container.remove();
-        localStorage.removeItem("sheet-"+this.#name+"-data");
+        appStorage.remove("sheet-"+this.#name+"-data");
     }
     
 

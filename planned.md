@@ -1,7 +1,6 @@
 Planned features and fixes:
 - Operation/method field in PUSH should be contextual, based on selected resource and based on the Zabbix version
   - quick workaround until feature is implemented: replace the HTML select with a smart select which allows the possibility to add new options on the fly
-- reimplement storage of data using IndexedDB instead of LocalStorage
 - fix saving active data at all times
 - save column width
 - always validate API connectivity before any request
@@ -12,5 +11,4 @@ Planned features and fixes:
 - add preprocessing steps both for IMPORT and PULL
 - add cancel request for running request
 - fix the problem that the filter disapears when adding new column in a filtered view
-- save session on write events (not with a cron as it is now)
 - refactor req_template to comply with single responsability principle 

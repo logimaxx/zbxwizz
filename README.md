@@ -14,7 +14,7 @@
 - Advanced Scripting: Built-in script editor with full access to the ZbxWizz API for complex automation scenarios
 - Efficient Data Management:
   - Create new worksheets from selected or visible rows
-  - Automatic saving to localStorage (5MB limit per session - IndexedDB implementation in progress for expanded storage)
+  - Automatic saving of worksheet data to IndexedDB (avoids the ~5MB localStorage limit; connection prefs and templates still use localStorage)
 - Environment Portability: Export and import your complete work environment as JSON files for seamless workflow continuity
 
 ## Security

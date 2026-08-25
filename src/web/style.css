@@ -210,6 +210,10 @@ tr {
 tbody > tr.selected {
     background: var(--selected-row);
 }
+.dataTable tbody > tr.selected td:first-child,
+.dataTable tbody > tr.selected td:nth-child(2) {
+    background: var(--selected-row);
+}
 table td {
     white-space: pre;
 }

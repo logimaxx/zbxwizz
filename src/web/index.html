@@ -109,13 +109,13 @@
         </nav>
         <div class="tab-content" id="worksheets">
             <div class="vertical-center emptyDataTablePlaceholder">
-                <div class="d-inline-block text-center alert" style="width: 500px">
-                    <p><strong>ZbxWizz</strong> is a very powerful tool &#x1F680; to manage <strong>Zabbix&trade;</strong> configuration. But with great power comes great responsibility!</p>
-                    <p>You can save a lot of time and effort but you can also ruin your day by pushing the wrong commands. Use it wisely and at your own risk! </p>
+                <div class="d-inline-block text-center alert">
+                    <p><strong>ZbxWizz</strong> is a powerful tool to manage <strong>Zabbix&trade;</strong> configuration. With great power comes great responsibility.</p>
+                    <p>You can save a lot of time and effort, but you can also ruin your day by pushing the wrong commands. Use it wisely and at your own risk.</p>
                 </div>
             </div>
         </div>
-        <footer class="footer bg-secondary border-top border-dark">
+        <footer class="footer">
             <div class="container-fluid p-1 d-flex" >
                 <div class="flex-grow-1" style="overflow: auto;">
 
@@ -123,19 +123,17 @@
                         <ul class="nav nav-pills" id="sheetSelector" role="tablist" data-lastassigned="1"></ul>
                     </div>
 
-                    <button onclick="sheetManager.new_sheet()" class="btn btn-info btn-sm addremove"><i class="fa fa-plus"></i> <span>New sheet</span></button>
-                    <button onclick="sheetManager.delete_sheet()" class="btn btn-danger btn-sm addremove"><i class="fa fa-minus"></i><span> Remove current sheet</span></button>
+                    <button onclick="sheetManager.new_sheet()" class="btn btn-info btn-sm addremove" type="button"><i class="fa fa-plus"></i> <span>New sheet</span></button>
+                    <button onclick="sheetManager.delete_sheet()" class="btn btn-danger btn-sm addremove" type="button"><i class="fa fa-minus"></i><span> Remove current sheet</span></button>
                 </div>
                 <div onclick="sheetManager.update_stats()" style="min-width: 250px !important;">
                     <a href="#" onclick="$ws.scrollTop(0).scrollLeft(0)" title="To top"><i class="fa fa-arrow-up text-white"></i></a>
-                    <a href="#" onclick="save_session(true)" title="To top"><i class="fa fa-save text-white"></i></a>
+                    <a href="#" onclick="save_session(true)" title="Save session"><i class="fa fa-save text-white"></i></a>
                     <span class="badge badge-light mr-1">Total: <span class="badge badge-secondary" id="totalRecs">0</span></span>
                     <span class="badge badge-light mr-1">Selected: <span class="badge badge-success" id="totalSelected">0</span></span>
                     <span class="badge badge-light mr-1">Visible: <span class="badge badge-danger" id="totalVisible">0</span></span>
                 </div>
-    <!--            <button onclick="worksheets.reset()">[x] Reset</button>-->
             </div>
-            
         </footer>
     </div>
 
@@ -302,11 +300,11 @@
         </div>
 
         <div class="vertical-center emptyDataTablePlaceholder" id="emptyDataTable">
-            <div class="d-inline-block text-center" style="width: 500px">
-                <button onclick='' style='width: 200px !important; display: inline-block  !important;' data-toggle='modal' data-target='#importCsvModal'>Import CSV</button>
-                <button onclick='' style='width: 200px !important; display: inline-block  !important;' data-toggle='modal' data-target='#importXlsModal'>Import Excel</button>
-                <button style='width: 200px !important; display: inline-block  !important;' onclick="import_from_zbx_modal()">Import from Zabbix</button>
-                <button style='width: 200px !important; display: inline-block  !important;' onclick="import_from_js_modal()">Import from JavaScript</button>
+            <div class="d-inline-block text-center">
+                <button type="button" data-toggle="modal" data-target="#importCsvModal">Import CSV</button>
+                <button type="button" data-toggle="modal" data-target="#importXlsModal">Import Excel</button>
+                <button type="button" onclick="import_from_zbx_modal()">Import from Zabbix</button>
+                <button type="button" onclick="import_from_js_modal()">Import from JavaScript</button>
             </div>
         </div>
     </div>
@@ -661,7 +659,7 @@
             <div class="d-inline ">
                 <div class="rounded rounded-5 bg-white border opacity-100 p-3">
                     <div class="text-center" id="progressText"></div>
-                    <progress id="loading" value="32" max="100" style="display: none; height: 1em;background-color: #eee;border-radius: 2px;box-shadow: 0 2px 5px rgba(0, 0, 0, 0.25) inset;"></progress>
+                    <progress id="loading" value="32" max="100" style="display: none; height: 1em; width: 100%;"></progress>
                 </div>
             </div>
         </div>

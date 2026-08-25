@@ -313,6 +313,8 @@ async function pull_from_api(sheet, resource, operation,template, success=new Fu
              * @param {Row} row
              */
             (resp,row) => {
+                if (typeof resp.error !== "undefined")
+                    return row.set_error(resp.error);
                 if (resp.result) {
                     if(resp.result.length)
                         row.data[label] = resp.result.length===1 ? resp.result[0] : resp.result ;
@@ -526,8 +528,7 @@ function load_csv(form,loadType="file") {
             records: data.data,
             fields: data.meta.fields
         };
-        localStorage.setItem("sheet-"+dt.container_id + "-data", JSON.stringify(data));
-        
+
         for(let i=0;i<data.records.length;i++) {
             data.records[i] = {
                 flds: data.records[i]
@@ -664,15 +665,20 @@ function zbx_connect() {
     zbx = new ZBXApi(url, token,bulkquerymode);
     overlay.show();
     zbx.get("host", {limit: 1}).then(data => {
-        if (typeof data.result !== undefined) {
+        if (data && typeof data.result !== "undefined") {
             $("#zbxLogo").removeClass("notConnected");
             zbx.status = true;
         }
         else {
+            $("#zbxLogo").addClass("notConnected");
             zbx.status = false;
         }
     })
-    .catch(e=>log("could not connect to zabbix. Invalid URL or token?")).finally(() => overlay.hide());
+    .catch(e=>{
+        log("could not connect to zabbix. Invalid URL or token?");
+        $("#zbxLogo").addClass("notConnected");
+        zbx.status = false;
+    }).finally(() => overlay.hide());
 }
 
 /**

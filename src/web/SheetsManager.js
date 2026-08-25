@@ -244,7 +244,7 @@ class SheetsManager {
     }
 
     rename_sheet(oldName,newName) {
-        if(oldName!==newName && this.sheets.newName) throw "Sheet "+newName+" already exists";
+        if(oldName!==newName && this.sheets[newName]) throw "Sheet "+newName+" already exists";
         log("RENAMING SHEET",oldName,newName,this)
         this.sheets[newName] = this.sheets[oldName];
         const sheetId = this.sheets[newName].id;

@@ -9,8 +9,8 @@ class Sheet {
     <input type="checkbox" id="selectAll" onclick="$(this).parents('table').data().sheet.toggle_all_visible(this.checked)"><br>
 </th>
 <th>
-    <div class="text-center align-top" style="height: 60px">
-        <button class="dropdown-toggle w-100 d-block" style="height: 100%" data-toggle="dropdown"><i class="fa fa-bars"></i></button>
+    <div class="text-center align-top header-tools">
+        <button class="dropdown-toggle w-100 d-block" data-toggle="dropdown"><i class="fa fa-bars"></i></button>
         <div class="dropdown-menu dropdown">
             <h6 class="dropdown-header">Actions</h6>
             <a class="dropdown-item" role="button" href="#" onclick="sheetManager.get_active().add_rows_dialog()">Add rows</a>
@@ -109,7 +109,7 @@ class Sheet {
     #id;
 
     /** Estimated row height for virtualization (px). Keep in sync with CSS. */
-    static ROW_HEIGHT = 28;
+    static ROW_HEIGHT = 24;
     static OVERSCAN = 12;
     #spacerTop = null;
     #spacerBottom = null;

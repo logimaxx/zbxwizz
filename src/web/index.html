@@ -20,92 +20,83 @@
 </head>
 <body style="overflow: hidden;">
     <div id="mainView">
-        <nav class="navbar navbar-expand-md navbar-light" id="top" >
-            <button class="navbar-toggler collapsed" type="button" data-toggle="collapse" data-target="#navbarsExample04" aria-controls="navbarsExample04" aria-expanded="false" aria-label="Toggle navigation">
+        <nav class="navbar navbar-expand-md navbar-light" id="top">
+            <a class="navbar-brand app-brand" href="#" onclick="return false;" title="ZbxWizz">ZbxWizz</a>
+            <button class="navbar-toggler collapsed" type="button" data-toggle="collapse" data-target="#mainNav" aria-controls="mainNav" aria-expanded="false" aria-label="Toggle navigation">
                 <i class="fa fa-bars"></i>
             </button>
-            <div class="navbar-collapse collapse" id="navbarsExample04">
+            <div class="navbar-collapse collapse" id="mainNav">
                 <ul class="navbar-nav mr-auto">
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle active" href="#" role="button" data-toggle="dropdown" aria-expanded="false" ondummymouseover="$(this).dropdown('toggle')">
-                            Environment
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-expanded="false">
+                            File
                         </a>
                         <div class="dropdown-menu">
-                            <a class="dropdown-item" href="#" role="button" onclick="sheetManager.reset()">New</a>
-                            <a class="dropdown-item" href="#" role="button" onclick="save_env(true)">Save</a>
-                            <a class="dropdown-item" role="button" data-toggle="modal" data-target="#load_env">Load</a>
+                            <a class="dropdown-item" href="#" role="button" onclick="sheetManager.reset()"><i class="fa fa-file-o fa-fw"></i> New</a>
+                            <a class="dropdown-item" href="#" role="button" onclick="save_env(true)"><i class="fa fa-save fa-fw"></i> Save</a>
+                            <a class="dropdown-item" href="#" role="button" data-toggle="modal" data-target="#load_env"><i class="fa fa-folder-open-o fa-fw"></i> Load</a>
                         </div>
                     </li>
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle active" href="#" role="button" data-toggle="dropdown" aria-expanded="false" ondummymouseover="$(this).dropdown('toggle')">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-expanded="false">
                             Data
                         </a>
                         <div class="dropdown-menu">
-                            <a class="dropdown-item" role="button" data-toggle="modal" data-target="#importCsvModal">Import CSV</a>
-                            <a class="dropdown-item" role="button" data-toggle="modal" data-target="#importXlsModal">Import XLS</a>
-                            <a class="dropdown-item" role="button" onclick="import_from_zbx_modal()">Import from Zabbix</a>
-                            <a class="dropdown-item" role="button" onclick="req_modal('#importJsForm','Import from JavaScript',req_import_js,sheetManager.get_active(),{attrs:{style: 'width: 500px; height: 650px !important'}},false,preview_req_import_js)">Import from JavaScript</a>
-
+                            <h6 class="dropdown-header">Import</h6>
+                            <a class="dropdown-item" href="#" role="button" data-toggle="modal" data-target="#importCsvModal"><i class="fa fa-file-text-o fa-fw"></i> CSV</a>
+                            <a class="dropdown-item" href="#" role="button" data-toggle="modal" data-target="#importXlsModal"><i class="fa fa-file-excel-o fa-fw"></i> Excel</a>
+                            <a class="dropdown-item" href="#" role="button" onclick="import_from_zbx_modal()"><i class="fa fa-cloud-download fa-fw"></i> From Zabbix</a>
+                            <a class="dropdown-item" href="#" role="button" onclick="req_modal('#importJsForm','Import from JavaScript',req_import_js,sheetManager.get_active(),{attrs:{style: 'width: 500px; height: 650px !important'}},false,preview_req_import_js)"><i class="fa fa-code fa-fw"></i> From JavaScript</a>
                             <div class="dropdown-divider"></div>
-                            <a class="dropdown-item" role="button"  href="#" onclick="prompt_save_data()">Export to CSV</a>
-                            <a class="dropdown-item" role="button"  href="#" onclick="prompt_save_xls()">Export to XLS</a>
-                            <a class="dropdown-item" role="button" href="#" onclick="chart_modal()">Chart data</a>
-                            <!-- <a class="dropdown-item" role="button" onclick="alert_modal('Not yet implemented')">Export JSON</a> -->
+                            <h6 class="dropdown-header">Export</h6>
+                            <a class="dropdown-item" href="#" role="button" onclick="prompt_save_data()"><i class="fa fa-download fa-fw"></i> CSV</a>
+                            <a class="dropdown-item" href="#" role="button" onclick="prompt_save_xls()"><i class="fa fa-file-excel-o fa-fw"></i> Excel</a>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item" href="#" role="button" onclick="chart_modal()"><i class="fa fa-bar-chart fa-fw"></i> Chart data</a>
                         </div>
                     </li>
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle active" href="#" role="button" data-toggle="dropdown" aria-expanded="false" ondummymouseover="$(this).dropdown('toggle')">
-                            Table ops
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-expanded="false">
+                            Table
                         </a>
                         <div class="dropdown-menu">
-                            <a class="dropdown-item" href="#" role="button" onclick="sheetManager.get_active().add_rows_dialog()">Add rows</a>
-                            <a class="dropdown-item" href="#" onclick="sheetManager.get_active().reorder_columns_dialog()">Reorder columns</a>
-                            <!-- <a class="dropdown-item" href="#" onclick="sheetManager.get_active().copy_to_new_sheet_dialog()">Copy to new sheet</a> -->
+                            <a class="dropdown-item" href="#" role="button" onclick="sheetManager.get_active().add_rows_dialog()"><i class="fa fa-plus fa-fw"></i> Add rows</a>
+                            <a class="dropdown-item" href="#" role="button" onclick="sheetManager.get_active().reorder_columns_dialog()"><i class="fa fa-columns fa-fw"></i> Reorder columns</a>
                         </div>
                     </li>
-
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle active" href="#" role="button" data-toggle="dropdown" aria-expanded="false" ondummymouseover="$(this).dropdown('toggle')">
-                            Zabbix ops
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-expanded="false">
+                            Zabbix
                         </a>
                         <div class="dropdown-menu">
-                            <a class="dropdown-item" role="button" onclick="pull_from_zbx_modal()">Pull</a>
-                            <a class="dropdown-item" role="button" onclick="push_to_zbx_modal()">Push</a>
+                            <a class="dropdown-item" href="#" role="button" onclick="pull_from_zbx_modal()"><i class="fa fa-arrow-down fa-fw"></i> Pull</a>
+                            <a class="dropdown-item" href="#" role="button" onclick="push_to_zbx_modal()"><i class="fa fa-arrow-up fa-fw"></i> Push</a>
                         </div>
                     </li>
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle active" href="#" role="button" data-toggle="dropdown" aria-expanded="false" ondummymouseover="$(this).dropdown('toggle')">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-expanded="false">
                             Tools
                         </a>
                         <div class="dropdown-menu">
-                            <!-- <a class="dropdown-item" role="button"  href="#" onclick="save_structure()">Save table structure</a>
-                            <a class="dropdown-item" role="button"  href="#" onclick="manage_struct()">Restore table structure</a>
-                            <div class="dropdown-divider"></div> -->
-                            <a class="dropdown-item" role="button"  href="#" onclick="open_play_editor()">Script editor</a>
-                            <!-- <div class="dropdown-divider"></div>
-                            <a class="dropdown-item" role="button"  href="#" onclick="under_development()">Settings</a>
-
-                            <div class="dropdown-divider"></div>
-                            <a class="dropdown-item" role="button"  href="#" onclick="under_development()">Help</a> -->
+                            <a class="dropdown-item" href="#" role="button" onclick="open_play_editor()"><i class="fa fa-terminal fa-fw"></i> Script editor</a>
                         </div>
                     </li>
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle active" href="#" role="button" data-toggle="dropdown" aria-expanded="false" ondummymouseover="$(this).dropdown('toggle')">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-expanded="false">
                             Help
                         </a>
-                        <div class="dropdown-menu">
-                            <a class="dropdown-item" href="#" role="button" onclick="documentation_modal()">ZbxWizz documentation</a>
-                            <a class="dropdown-item" href="https://www.zabbix.com/documentation/current/en/manual/api" role="button" target="_blank">Zabbix documention</a>
-                            <!-- <a class="dropdown-item" href="#" role="button">ZbxWizz FAQ</a> -->
-                            <a class="dropdown-item" href="#" role="button" onclick="contact_modal()">Contact the developer</a>
+                        <div class="dropdown-menu dropdown-menu-right">
+                            <a class="dropdown-item" href="#" role="button" onclick="documentation_modal()"><i class="fa fa-book fa-fw"></i> ZbxWizz documentation</a>
+                            <a class="dropdown-item" href="https://www.zabbix.com/documentation/current/en/manual/api" role="button" target="_blank"><i class="fa fa-external-link fa-fw"></i> Zabbix documentation</a>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item" href="#" role="button" onclick="contact_modal()"><i class="fa fa-envelope-o fa-fw"></i> Contact the developer</a>
                         </div>
                     </li>
                 </ul>
-                <span class="dropdown">
-
-                </span>
-                <a class="nav-link" href="#"  role="button" data-toggle="modal" data-target="#zbxConfigModal"><img src="zbx_logo.png" width="30" id="zbxLogo" class="notConnected" alt="API Conn"></a>
-
+                <a class="zbx-conn" href="#" role="button" data-toggle="modal" data-target="#zbxConfigModal" title="Zabbix API connection">
+                    <img src="zbx_logo.png" width="22" height="22" id="zbxLogo" class="notConnected" alt="">
+                    <span class="zbx-conn-pill" id="zbxConnStatus">Not connected</span>
+                </a>
             </div>
         </nav>
         <div class="tab-content" id="worksheets">
@@ -535,12 +526,13 @@
     
 
 
-    <div class="modal" id="importCsvModal">
+    <div class="modal fade" id="importCsvModal" tabindex="-1" role="dialog" aria-labelledby="importCsvModalLabel" aria-hidden="true">
         <form id="loadCvsForm" onsubmit="event.preventDefault();">
-            <div class="modal-dialog">
+            <div class="modal-dialog modal-dialog-centered" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
-                        Load from CSV
+                        <h5 class="modal-title" id="importCsvModalLabel">Load from CSV</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                     </div>
                     <div class="modal-body">
                         <ul class="nav nav-tabs" id="myTab" role="tablist">
@@ -559,8 +551,8 @@
                                 <textarea name="csvtext" class="form-control" rows="10"></textarea>
                             </div>
                         </div>
-                        <div>
-                            Load into:<br>
+                        <div class="form-group mb-0">
+                            <label>Load into</label>
                             <select name="sheet" class="custom-select">
                                 <option value="">New sheet</option>
                                 <option value="overwrite">Overwrite existing sheet</option>
@@ -569,32 +561,41 @@
                         <input type="hidden" name="load_type" value="file">
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-primary" onclick="load_csv(this.form,this.form.load_type.value)" ><i class="fa fa-file"></i> Load </button>
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-primary" onclick="load_csv(this.form,this.form.load_type.value)"><i class="fa fa-file"></i> Load</button>
                     </div>
                 </div>
             </div>
         </form>
     </div>
-    <div class="modal" id="importXlsModal">
+    <div class="modal fade" id="importXlsModal" tabindex="-1" role="dialog" aria-labelledby="importXlsModalLabel" aria-hidden="true">
         <form id="loadXlsForm" onsubmit="event.preventDefault(); load_xls(this,true)">
-            <div class="modal-dialog">
+            <div class="modal-dialog modal-dialog-centered" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
-                        Load from Excel file
+                        <h5 class="modal-title" id="importXlsModalLabel">Load from Excel</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                     </div>
                     <div class="modal-body">
-                        <input type="file" name="file" accept="application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" required>
+                        <div class="form-group">
+                            <label>Excel file</label>
+                            <input type="file" name="file" class="form-control-file" accept="application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" required>
+                        </div>
                         <div class="sheets2import">
-                            <label>Sheets to import</label>
-                            <select name="sheets" multiple class="custom-select custom-select-sm" required></select>
-                            <label><input type="checkbox" name="overwrite" value="1"> Overwrite existing sheets</label>
+                            <div class="form-group">
+                                <label>Sheets to import</label>
+                                <select name="sheets" multiple class="custom-select custom-select-sm" required></select>
+                            </div>
+                            <div class="custom-control custom-checkbox">
+                                <input type="checkbox" class="custom-control-input" name="overwrite" value="1" id="xlsOverwrite">
+                                <label class="custom-control-label" for="xlsOverwrite">Overwrite existing sheets</label>
+                            </div>
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="submit" class="btn btn-success"  name="import">Import</button>
-                        <button type="button" class="btn btn-primary" name="load" onclick="load_xls(this.form)">Load</button>
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-primary" name="load" onclick="load_xls(this.form)">Load</button>
+                        <button type="submit" class="btn btn-success" name="import">Import</button>
                     </div>
                 </div>
             </div>
@@ -602,65 +603,69 @@
     </div>
 
 
-    <div class="modal" id="zbxConfigModal">
+    <div class="modal fade" id="zbxConfigModal" tabindex="-1" role="dialog" aria-labelledby="zbxConfigModalLabel" aria-hidden="true">
         <form id="zbxConfigForm" onsubmit="event.preventDefault();save_zbx_config(this)">
-            <div class="modal-dialog">
+            <div class="modal-dialog modal-dialog-centered" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
-                        Zabbix connection
+                        <h5 class="modal-title" id="zbxConfigModalLabel">Zabbix connection</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                     </div>
                     <div class="modal-body">
                         <div class="form-group">
                             <label for="zbxUrlInput">API URL</label>
-                            <div class="input-group mb-3">
-                                <input type="text" class="form-control" name="url" id="zbxUrlInput">
-                            </div>
+                            <input type="text" class="form-control" name="url" id="zbxUrlInput" placeholder="https://zabbix.example/api_jsonrpc.php">
                         </div>
                         <div class="form-group">
                             <label for="zbxTokenInput">API Token</label>
-                            <div class="input-group mb-3">
-                                <input type="text" class="form-control" name="token" id="zbxTokenInput">
-                            </div>
+                            <input type="text" class="form-control" name="token" id="zbxTokenInput" autocomplete="off">
                         </div>
-                        <div class="form-group">
-                            <label for="zbxTokenInput">API query mode</label>
-                            <div class="input-group mb-3">
-                                <select class="custom-select" name="bulkquerymode" id="zbxBulkQueryMode">
-                                    <option value="parallel" selected>parallel (fast, but could cause problems)</option>
-                                    <option value="seq">sequential (slow)</option>
-                                    <option value="batch">hybrid (sequence of parallel batches)</option>
-                                </select>
-                            </div>
+                        <div class="form-group mb-0">
+                            <label for="zbxBulkQueryMode">API query mode</label>
+                            <select class="custom-select" name="bulkquerymode" id="zbxBulkQueryMode">
+                                <option value="parallel" selected>Parallel (fast, but could cause problems)</option>
+                                <option value="seq">Sequential (slow)</option>
+                                <option value="batch">Hybrid (sequence of parallel batches)</option>
+                            </select>
                         </div>
-
                     </div>
                     <div class="modal-footer">
-                        <button type="submit" class="btn btn-primary" data-dismiss="modal" onclick="save_zbx_config(this.form)">Save config</button>
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary" data-dismiss="modal" onclick="save_zbx_config(this.form)">Save config</button>
                     </div>
                 </div>
             </div>
         </form>
     </div>
-    <div class="modal" id="load_env">
-        <div class="modal-dialog modal-dialog-scrollable">
+    <div class="modal fade" id="load_env" tabindex="-1" role="dialog" aria-labelledby="loadEnvModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" role="document">
             <div class="modal-content">
                 <form onsubmit="event.preventDefault();load_env(this,$(this).parents('.modal'))">
-                <div class="modal-header">Load environment</div>
+                <div class="modal-header">
+                    <h5 class="modal-title" id="loadEnvModalLabel">Load environment</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                </div>
                 <div class="modal-body">
-                    <input type="file" name="envfile" accept="application/json">
+                    <div class="form-group mb-0">
+                        <label>Environment file</label>
+                        <input type="file" name="envfile" class="form-control-file" accept="application/json">
+                    </div>
                 </div>
                 <div class="modal-footer">
-                    <button class="btn btn-secondary" type="submit">Load</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button class="btn btn-primary" type="submit">Load</button>
                 </div>
                 </form>
             </div>
         </div>
     </div>
-    <div class="modal" id="generic_modal"  data-backdrop='static' data-keyboard="false" >
-        <div class="modal-dialog modal-dialog-scrollable">
+    <div class="modal fade" id="generic_modal" tabindex="-1" role="dialog" data-backdrop="static" data-keyboard="false" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" role="document">
             <div class="modal-content">
-                <div class="modal-header"></div>
+                <div class="modal-header">
+                    <h5 class="modal-title"></h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                </div>
                 <div class="modal-body"></div>
                 <div class="modal-footer">
                     <button data-dismiss="modal" class="btn btn-secondary">Close</button>
@@ -670,10 +675,10 @@
     </div>
     <div id="overlay" class="overlay">
         <div class="vertical-center">
-            <div class="d-inline ">
-                <div class="rounded rounded-5 bg-white border opacity-100 p-3">
+            <div class="d-inline">
+                <div class="overlay-panel">
                     <div class="text-center" id="progressText"></div>
-                    <progress id="loading" value="32" max="100" style="display: none; height: 1em; width: 100%;"></progress>
+                    <progress id="loading" value="32" max="100" style="display: none; height: 0.55rem; width: 100%;"></progress>
                 </div>
             </div>
         </div>

@@ -57,7 +57,9 @@ function normal_modal(opts = {}) {
     if (!opts.title) {
         header.remove()
     } else {
-        header.html(opts.title);
+        header.empty()
+            .append($("<h5 class='modal-title'>").html(opts.title))
+            .append('<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>');
     }
 
     // set footer if present
@@ -69,6 +71,8 @@ function normal_modal(opts = {}) {
         if(opts.buttons) {
             footer.empty();
             opts.buttons.forEach(btn=>{
+                if(!btn.action || typeof btn.action!=="function")
+                    btn.action = new Function();
                 let $btn = $("<button>").attr("type","button").addClass("btn btn-sm btn-"+btn.class).text(btn.text).on("click",()=>btn.action($modal)).appendTo(footer);
                 if(btn.attrs) {
                     Object.keys(btn.attrs).forEach(attr=>$btn.attr(attr,btn.attrs[attr]));
@@ -244,10 +248,12 @@ function formatUnix(value) {
 }
 
 function dragable_modal(opts) {
-    let tpl = `<div class="card draggableModal" id="draggableModal" style="position: absolute">
-            <div class="card-header d-flex">
+    let tpl = `<div class="card draggableModal" style="position: absolute">
+            <div class="card-header d-flex align-items-center">
                 <div class="flex-grow-1 dgm-modal-title"></div>
-                <div class="mr-1"><span onclick="$(this).parents('.draggableModal').hide()" style="cursor: pointer"><i class="fa fa-times-rectangle"></i></span></div>
+                <button type="button" class="dgm-close" title="Close" aria-label="Close" onclick="$(this).closest('.draggableModal').hide()">
+                    <i class="fa fa-times"></i>
+                </button>
             </div>
             <div class="card-body"></div>
             <div class="card-footer text-right"></div>

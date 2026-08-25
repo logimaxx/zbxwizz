@@ -696,13 +696,28 @@ function load_xls(form,load=false) {
 }
 
 
+function set_zbx_connection_ui(connected) {
+    const logo = $("#zbxLogo");
+    const pill = $("#zbxConnStatus");
+    const wrap = $(".zbx-conn");
+    if (connected) {
+        logo.removeClass("notConnected");
+        wrap.addClass("is-connected").removeClass("is-disconnected");
+        pill.text("Connected");
+    } else {
+        logo.addClass("notConnected");
+        wrap.addClass("is-disconnected").removeClass("is-connected");
+        pill.text("Not connected");
+    }
+}
+
 /**
  * 
  * @param {HTMLFormElement} form 
  */
 function save_zbx_config(form) {
     log("save config");
-    $("#zbxLogo").addClass("notConnected");
+    set_zbx_connection_ui(false);
     localStorage.setItem("zbxUrl", form.url.value);
     localStorage.setItem("zbxToken", form.token.value);
     log(form.bulkquerymode.value)
@@ -734,17 +749,17 @@ function zbx_connect() {
     overlay.show();
     zbx.get("host", {limit: 1}).then(data => {
         if (data && typeof data.result !== "undefined") {
-            $("#zbxLogo").removeClass("notConnected");
+            set_zbx_connection_ui(true);
             zbx.status = true;
         }
         else {
-            $("#zbxLogo").addClass("notConnected");
+            set_zbx_connection_ui(false);
             zbx.status = false;
         }
     })
     .catch(e=>{
         log("could not connect to zabbix. Invalid URL or token?");
-        $("#zbxLogo").addClass("notConnected");
+        set_zbx_connection_ui(false);
         zbx.status = false;
     }).finally(() => overlay.hide());
 }

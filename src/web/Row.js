@@ -39,14 +39,30 @@ class Row {
     #mounted = false;
     #statusClass = "";
 
-    #rowMenu = `<a class="dropdown-item" role='button'  href='#' onclick="$(this).parents('tr').data().rowRef.info()">Row info</a>`+
-        '<a class="dropdown-item" role="button"  href="#" onclick="$(this).parents(\'tr\').data().rowRef.duplicate()">Duplicate row</a>' +
-        '<a class="dropdown-item" role="button"  href="#" onclick="confirm_modal(\'Are you sure you want to delete this record?\',()=>$(this).parents(\'tr\').data().rowRef.delete())">Delete row</a>' +
-        '<a class="dropdown-item" role="button"  href="#" onclick="$(this).parents(\'tr\').data().rowRef.insert(\'before\')">Insert empty row before</a>'+
-        '<a class="dropdown-item" role="button"  href="#" onclick="$(this).parents(\'tr\').data().rowRef.insert(\'after\')">Insert empty row after</a>'
+    #rowMenu = `<a class="dropdown-item" role='button'  href='#' data-row-action="info">Row info</a>`+
+        '<a class="dropdown-item" role="button"  href="#" data-row-action="duplicate">Duplicate row</a>' +
+        '<a class="dropdown-item" role="button"  href="#" data-row-action="delete">Delete row</a>' +
+        '<a class="dropdown-item" role="button"  href="#" data-row-action="insert-before">Insert empty row before</a>'+
+        '<a class="dropdown-item" role="button"  href="#" data-row-action="insert-after">Insert empty row after</a>'
         ;
 
-    #btnCellTpl = `<button class="dropdown-toggle w-100" role="button" data-toggle="dropdown" aria-expanded="false">Tools</button><div class="dropdown-menu dropdown"></div>`;
+    #btnCellTpl = `<button class="row-menu-btn btn btn-sm btn-outline-secondary dropdown-toggle" type="button" role="button" data-toggle="dropdown" aria-expanded="false" title="Row menu">Menu</button><div class="dropdown-menu dropdown"></div>`;
+
+    #bindRowMenu($menu) {
+        const row = this;
+        $menu.off("click.rowMenu").on("click.rowMenu", "[data-row-action]", (e) => {
+            e.preventDefault();
+            const action = $(e.currentTarget).attr("data-row-action");
+            if (action === "info") row.info();
+            else if (action === "duplicate") row.duplicate();
+            else if (action === "delete") confirm_modal("Are you sure you want to delete this record?", () => row.delete());
+            else if (action === "insert-before") row.insert("before");
+            else if (action === "insert-after") row.insert("after");
+            const owner = $menu.data("rowMenuOwner");
+            if (owner) $(owner).find(".dropdown-toggle").dropdown("hide");
+            else $menu.removeClass("show");
+        });
+    }
     hide(){
         if(this.#hidden) return;
         this.#hidden = true;
@@ -437,9 +453,47 @@ class Row {
             .append(this.#btnCellTpl);
 
         let tpl = this.#rowMenu;
-        menuCell.find("button").text(this.#rowIdx).parent().on("show.bs.dropdown",(event=>{
-            $(event.target).children(".dropdown-menu").empty().append(tpl).parents("tr").css("z-index",1000);
-        }));
+        const row = this;
+        menuCell.find("button").text(this.#rowIdx).parent()
+            .on("show.bs.dropdown", (event) => {
+                const $cell = $(event.target);
+                $cell.closest("tr").addClass("row-menu-open");
+                const $menu = $cell.children(".dropdown-menu").empty().append(tpl);
+                row.#bindRowMenu($menu);
+            })
+            .on("shown.bs.dropdown", (event) => {
+                const $cell = $(event.target);
+                const $btn = $cell.children(".dropdown-toggle");
+                const $menu = $cell.children(".dropdown-menu");
+                if (!$menu.length) return;
+                const rect = $btn[0].getBoundingClientRect();
+                $menu
+                    .data("rowMenuOwner", $cell)
+                    .appendTo(document.body)
+                    .addClass("row-menu-floating show")
+                    .css({
+                        position: "fixed",
+                        top: Math.min(rect.top, window.innerHeight - $menu.outerHeight() - 8) + "px",
+                        left: Math.min(rect.right + 2, window.innerWidth - $menu.outerWidth() - 8) + "px",
+                        transform: "none",
+                        zIndex: 3000
+                    });
+            })
+            .on("hide.bs.dropdown", (event) => {
+                const $cell = $(event.target);
+                const $floating = $("body > .dropdown-menu.row-menu-floating").filter((_, el) => {
+                    const owner = $(el).data("rowMenuOwner");
+                    return owner && $(owner).is($cell);
+                });
+                if ($floating.length) {
+                    $floating
+                        .removeClass("row-menu-floating show")
+                        .css({ position: "", top: "", left: "", transform: "", zIndex: "" })
+                        .removeData("rowMenuOwner")
+                        .appendTo($cell);
+                }
+                $cell.closest("tr").removeClass("row-menu-open");
+            });
 
         this.#cells.forEach(cell=>cell.render().appendTo(this.#el));
         this.#mounted = true;

@@ -41,7 +41,7 @@ It presents iself as a spreadsheet editor which connects to Zabbix API, allowing
 
 Clone the repo on your machine and open the index.html file using your favorite browser. You should also disabled CORS by using a plugin or by playing with the advanced browser settings, otherwise the browser policy will block the requests to the Zabbix API. How to do this is beyond the scope of this documention so google it.
 
-An Electron version and Zabbix module are in the making so stay tunned by subscribing to our mailing list.
+A Zabbix module is in the making so stay tunned by subscribing to our mailing list.
 
 ## Using ZbxWizz - short intro
 

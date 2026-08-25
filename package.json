@@ -3,19 +3,11 @@
   "version": "1.0.0",
   "description": "Zabbix Configuration Management Tool",
   "author": "Your Name",
-  "main": "src/electron/main.js",
-  "scripts": {
-    "start": "electron .",
-    "dev": "NODE_ENV=development electron .",
-    "publish": "electron-builder -p always",
-    "package": "electron-forge package",
-    "make": "electron-forge make"
-  },
+  "scripts": {},
   "dependencies": {
     "ace": "^1.3.0",
     "ace-builds": "^1.36.2",
     "bootstrap": "4.6.2",
-    "electron-updater": "^6.6.2",
     "font-awesome": "^4.7.0",
     "jquery": "^3.7.1",
     "jquery-ui": "^1.14.1",
@@ -26,26 +18,5 @@
     "select2": "^4.1.0-rc.0",
     "webpack": "^5.99.5",
     "xlsx": "^0.18.5"
-  },
-  "devDependencies": {},
-  "build": {
-    "appId": "com.zbxwizz.app",
-    "productName": "ZbxWizz",
-    "publish": [
-      {
-        "provider": "github",
-        "owner": "your-github-username",
-        "repo": "zbxwizz"
-      }
-    ],
-    "win": {
-      "target": "nsis"
-    },
-    "mac": {
-      "target": "dmg"
-    },
-    "linux": {
-      "target": "AppImage"
-    }
   }
 }

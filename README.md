@@ -27,7 +27,7 @@ Clone the repository on your machine and open the `index.html` file with your br
 
 You will also need to disable CORS. Depending on the browser, you should consider installing and extension to disable CORS.
 
-An Electron version and a Zabbix module are in the making, so stay tuned by subscribing to our newsletter (https://zbxwizz.app).
+A Zabbix module is in the making, so stay tuned by subscribing to our newsletter (https://zbxwizz.app).
 
 ## Documentation
 

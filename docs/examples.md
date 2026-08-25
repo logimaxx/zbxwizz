@@ -6,7 +6,7 @@ Copy-paste starting points for common tasks. Adjust column indices and field nam
 
 ## Import hosts with tags and interfaces
 
-**Data → Import from Zabbix** · Resource: `host`
+**Data → Import → From Zabbix** · Resource: `host`
 
 ```json
 {
@@ -40,7 +40,7 @@ Transform on the **tags** column:
 json(obj(data.csv.tags).concat({"tag":"reviewed","value":"2026-06-14"}))
 ```
 
-Push template (**Zabbix ops → Push** · `host` · `update`):
+Push template (**Zabbix → Push** · `host` · `update`):
 
 ```json
 {
@@ -74,7 +74,7 @@ Push:
 
 1. Import hosts (with `hostid`)
 2. Select rows
-3. **Zabbix ops → Pull** · Resource: `item` · Label: `items`
+3. **Zabbix → Pull** · Resource: `item` · Label: `items`
 
 ```json
 {
@@ -116,7 +116,7 @@ data.ifaces && data.ifaces[0] && data.ifaces[0].hosts
 
 ## Import triggers for a template
 
-**Import from Zabbix** · Resource: `trigger`
+**Data → Import → From Zabbix** · Resource: `trigger`
 
 ```json
 {
@@ -176,7 +176,7 @@ Sheet column `name` with group names. Push · `hostgroup` · `create`:
 ## Cross-sheet asset lookup
 
 **Sheet `hosts`:** imported hosts  
-**Sheet `assets`:** CSV/XLS with `hostid` and `owner`
+**Sheet `assets`:** CSV/Excel with `hostid` and `owner`
 
 On `hosts`, transform an `owner` column:
 
@@ -186,16 +186,37 @@ ws.assets.lookup(flds.hostid, "hostid", "owner", false) || ""
 
 ---
 
-## Bulk onboarding from CSV / XLS
+## Bulk onboarding from CSV / Excel
 
-1. Prepare a spreadsheet with at least `host`, `name`, and any macros/tags you need
-2. **Data → Import CSV** or **Import XLS**
-3. Use transforms to build JSON columns (tags, interfaces, macros) as the Zabbix API expects
-4. Push · `host` · `create` with a template that references those columns
-5. Start with **one** row and **sequential** query mode
+1. Prepare a spreadsheet with at least `host`, `name`, and a `groupid` (existing host group)
+2. **Data → Import → CSV** or **Import → Excel**
+3. Optionally transform columns into JSON the API expects — e.g. an `interfaces` column:
 
-Exact create payloads depend on your Zabbix version and required fields — mirror a working UI/API example, then parameterize with `${flds…}` / `${cols[…]}`.
+   ```javascript
+   json([{
+     "type": 1,
+     "main": 1,
+     "useip": 1,
+     "ip": flds.ip,
+     "dns": "",
+     "port": "10050"
+   }])
+   ```
 
+4. **Zabbix → Push** · Resource: `host` · Operation: `create`:
+
+   ```json
+   {
+     "host": "${flds.host}",
+     "name": "${flds.name}",
+     "groups": [{"groupid": "${flds.groupid}"}],
+     "interfaces": ${cols[YOUR_INTERFACES_COL]}
+   }
+   ```
+
+5. Start with **one** row and **Sequential** query mode
+
+Required fields vary by Zabbix version (templates, macros, tags, proxy, …). Mirror a working UI/API create, then parameterize with `${flds…}` / `${cols[…]}`.
 ---
 
 ## Generate test data (Import from JavaScript)
@@ -213,16 +234,16 @@ return Array.from({length: 10}, (_, i) => ({
 ## Export only selected rows for review
 
 1. Select rows to review
-2. **Data → Export to CSV** → only selected
+2. **Data → Export → CSV** → only selected
 3. Share the CSV before pushing
 
-To share several sheets at once (e.g. hosts + groups after a bulk edit), use **Data → Export to XLS**, keep the sheets you need selected, and download `export.xlsx`.
+To share several sheets at once (e.g. hosts + groups after a bulk edit), use **Data → Export → Excel**, keep the sheets you need selected, and download `export.xlsx`.
 
 ---
 
 ## Export problem / event history
 
-**Import from Zabbix** · Resource: `problem`
+**Data → Import → From Zabbix** · Resource: `problem`
 
 ```json
 {
@@ -247,7 +268,7 @@ Time window with Unix seconds:
 }
 ```
 
-**Import from Zabbix** · Resource: `event` (trigger events):
+**Data → Import → From Zabbix** · Resource: `event` (trigger events):
 
 ```json
 {
@@ -261,7 +282,7 @@ Time window with Unix seconds:
 }
 ```
 
-Then **Data → Export to CSV** (visible or all). Filter noisy names first if needed.
+Then **Data → Export → CSV** (visible or all). Filter noisy names first if needed.
 
 ---
 
@@ -295,9 +316,9 @@ Charts use **visible** rows by default, so filters apply.
 
 Before a risky operation:
 
-1. **Environment → Save** → e.g. `before-tag-migration.json`
+1. **File → Save** → e.g. `before-tag-migration.json`
 2. Run push
-3. If needed, **Environment → Load** to restore the workbook
+3. If needed, **File → Load** to restore the workbook
 
 Note: Save does not include API token or request templates.
 

@@ -49,17 +49,17 @@ Credentials and mode are stored in localStorage. The connection test runs `host.
 
 | Mode | Behaviour | When to use |
 |------|-----------|-------------|
-| **sequential** (`seq`) | One request after another | Safest for writes and large selections |
-| **parallel** | Many requests at once (browser-pooled) | Fast reads; riskier for heavy creates/updates |
-| **hybrid** (`batch`) | Sequential batches of 10 parallel requests | Compromise between speed and load |
+| **Parallel** (`parallel`) | Many requests at once (browser-pooled) | Fast reads; riskier for heavy creates/updates |
+| **Sequential** (`seq`) | One request after another | Safest for writes and large selections |
+| **Hybrid** (`batch`) | Sequential batches of 10 parallel requests | Compromise between speed and load |
 
-Start with **sequential** when testing Push templates on production.
+Start with **Sequential** when testing Push templates on production. The connection pill shows **Connected** after a successful `host.get` test.
 
 ---
 
 ## Pull — enrich rows from Zabbix
 
-**Zabbix ops → Pull**
+**Zabbix → Pull**
 
 For each selected + visible row, ZbxWizz calls `{resource}.get` with your template and attaches the result to the row.
 
@@ -102,7 +102,7 @@ Empty results surface as errors (“Not found”); failed rows log to the consol
 
 ## Push — write to Zabbix
 
-**Zabbix ops → Push**
+**Zabbix → Push**
 
 For each selected + visible row, ZbxWizz calls `{resource}.{operation}`.
 
@@ -171,8 +171,8 @@ Before pushing to production:
 1. **Test on one or two rows** first
 2. **Read the preview** after every template change
 3. **Use filters** to narrow visible rows before Select All
-4. Prefer **sequential** query mode for large writes
-5. **Environment → Save** and/or **Export CSV** as backup
+4. Prefer **Sequential** query mode for large writes
+5. **File → Save** and/or **Export → CSV / Excel** as backup
 6. **Avoid delete** until update templates are proven
 7. **Check token permissions** — the API enforces Zabbix role limits
 8. Remember the import **default limit of 5** so you do not push incomplete selections by mistake

@@ -5,13 +5,13 @@ This walkthrough takes you from a fresh install to updating host tags in Zabbix.
 Typical flow:
 
 ```text
-  Import (Zabbix / CSV / XLS / JS)
+  Import (Zabbix / CSV / Excel / JS)
             │
             ▼
   Edit sheet (filter · transform · pull)
             │
             ▼
-  Export (CSV / XLS / charts)  or  Push to Zabbix
+  Export (CSV / Excel / charts)  or  Push to Zabbix
 ```
 
 ---
@@ -22,7 +22,7 @@ Typical flow:
 2. Enter:
    - **API URL:** `api_jsonrpc.php` when served from the Zabbix frontend, or a full URL otherwise
    - **API Token:** from *Users → API tokens*
-   - **API query mode:** start with **sequential** for write tests
+   - **API query mode:** start with **Sequential** for write tests
 3. Click **Save config**
 
 The logo turns bright red when the connection test (`host.get` with `limit: 1`) succeeds.
@@ -31,7 +31,7 @@ The logo turns bright red when the connection test (`host.get` with `limit: 1`) 
 
 ## 2. Import hosts
 
-1. **Data → Import from Zabbix**
+1. **Data → Import → From Zabbix**
 2. **Resource:** `host`
 3. In the request editor, paste:
 
@@ -81,7 +81,7 @@ The footer shows **Total**, **Selected**, and **Visible** counts.
 
 ## 5. Push back to Zabbix
 
-1. **Zabbix ops → Push**
+1. **Zabbix → Push**
 2. Configure:
    - **Resource:** `host`
    - **Operation:** `update`
@@ -126,9 +126,9 @@ Verify the new tag in the Zabbix UI under *Data collection → Hosts*.
 If you prefer editing outside the app:
 
 1. Import from Zabbix
-2. **Data → Export to CSV**
+2. **Data → Export → CSV** (or **Excel**)
 3. Edit in Excel / LibreOffice
-4. **Data → Import CSV** (or **Import XLS**)
+4. **Data → Import → CSV** (or **Excel**)
 5. Push as above
 
 Ensure the host ID column is named `hostid`, or change `${flds.hostid}` in the push template to match your column name.

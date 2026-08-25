@@ -1,13 +1,13 @@
 # ZbxWizz documentation
 
-ZbxWizz is a spreadsheet-style client for the Zabbix API. Import configuration (or CSV/XLS), transform it with JavaScript, chart or export it, and push create/update/delete operations back to Zabbix — all in the browser.
+ZbxWizz is a spreadsheet-style client for the Zabbix API. Import configuration (or CSV/Excel), transform it with JavaScript, chart or export it, and push create/update/delete operations back to Zabbix — all in the browser.
 
 | Guide | Topics |
 |-------|--------|
 | [Getting started](getting-started.md) | Connect → import → transform → push |
 | [Installation](installation.md) | Deploy beside Zabbix UI or try locally |
 | [User interface](user-interface.md) | Menus, sheets, filters, IndexedDB |
-| [Import & export](import-export.md) | Zabbix / CSV / XLS / JS · CSV / XLS · charts |
+| [Import & export](import-export.md) | Zabbix / CSV / Excel / JS · CSV / Excel · charts |
 | [Zabbix operations](zabbix-operations.md) | Pull, Push, query modes, safety |
 | [Transformations](transformations.md) | Expression context and helpers |
 | [Examples](examples.md) | Copy-paste recipes |
@@ -19,13 +19,13 @@ Online mirror: [https://zbxwizz.app/docs/](https://zbxwizz.app/docs/). Sources: 
 ## Mental model
 
 ```text
-  Data → Import (Zabbix / CSV / XLS / JavaScript)
+  Data → Import (Zabbix / CSV / Excel / JavaScript)
                     │
                     ▼
          Edit sheet (filter · transform · pull)
                     │
                     ▼
-  Data → Export CSV / XLS / Chart    or    Zabbix ops → Push
+  Data → Export CSV / Excel / Chart    or    Zabbix → Push
 ```
 
 - Work happens in **sheets** (workbook tabs).
@@ -42,7 +42,7 @@ Click the **Zabbix logo** (top right):
 |-------|----------------|
 | API URL | `api_jsonrpc.php` on the Zabbix frontend, else full URL |
 | Token | *Users → API tokens* |
-| Query mode | `sequential` (safest writes) · `hybrid` · `parallel` |
+| Query mode | Sequential (safest writes) · Hybrid · Parallel |
 
 Bright red logo = connection OK. Settings are stored in localStorage. Optional `preset_env.json` can seed URL/token/mode when nothing is saved yet.
 
@@ -52,10 +52,10 @@ Bright red logo = connection OK. Settings are stored in localStorage. Optional `
 
 | Path | Notes |
 |------|--------|
-| **Data → Import from Zabbix** | `{resource}.get` params only; nested objects become JSON strings in cells; original object in `data.csv` |
-| **Data → Import CSV** | Header row required |
-| **Data → Import XLS** | Each Excel sheet → a ZbxWizz sheet |
-| **Data → Import from JavaScript** | Script must `return` an **array of objects** |
+| **Data → Import → From Zabbix** | `{resource}.get` params only; nested objects become JSON strings in cells; original object in `data.csv` |
+| **Data → Import → CSV** | Header row required |
+| **Data → Import → Excel** | Each Excel sheet → a ZbxWizz sheet |
+| **Data → Import → From JavaScript** | Script must `return` an **array of objects** |
 
 ---
 
@@ -96,23 +96,23 @@ Templates are JS template literals:
 |------|--------|
 | Sheet list + row data | **IndexedDB** (`zbxwizz`) |
 | URL, token, templates, transforms | **localStorage** |
-| Portable workbook | **Environment → Save / Load** (`.json`, sheets only) |
+| Portable workbook | **File → Save / Load** (`.json`, sheets only) |
 
 ---
 
 ## Safety
 
 1. Test Push on one or two rows first.
-2. Prefer sequential query mode for large writes.
+2. Prefer **Sequential** query mode for large writes.
 3. Filter before “select all visible”.
-4. Save an environment file and/or CSV before risky deletes.
+4. Save a workbook file (**File → Save**) and/or CSV/Excel before risky deletes.
 5. Check token permissions in Zabbix.
 
 ---
 
 ## Charts
 
-**Data → Chart data** — top-20 category frequencies (bar/pie) and optional clock histograms (hour of day or calendar day). Uses visible rows by default. Export as PNG or aggregated CSV from the dialog.
+**Data → Chart data** — top-20 category frequencies (bar/pie) and optional clock histograms (hour of day or calendar day). Uses visible rows by default. Export as PNG or aggregated CSV from the dialog. Full menu map: [User interface](user-interface.md).
 
 ---
 

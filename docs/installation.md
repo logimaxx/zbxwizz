@@ -57,7 +57,7 @@ Serving ZbxWizz from the same web root as the Zabbix UI is the best production s
    |-------|-------|
    | API URL | `api_jsonrpc.php` (same host as the UI) |
    | Token | from *Users → API tokens* in Zabbix |
-   | API query mode | `sequential` for safety, `hybrid` for balance, `parallel` for speed |
+   | API query mode | **Sequential** for safety, **Hybrid** for balance, **Parallel** for speed |
 
    When the connection test succeeds (`host.get` with `limit: 1`), the logo turns from pale red to bright red.
 
@@ -79,8 +79,8 @@ Do **not** commit real tokens. Prefer entering the token in the UI so it stays i
 
 Replace the copied files with the new version, then run `npm install` again if dependencies changed. Before upgrading, export your workbook if you rely on saved sheet data:
 
-- **Environment → Save** downloads sheets to a `.json` file
-- Connection settings, request templates, and saved transforms live in **localStorage** — they are not included in the environment file
+- **File → Save** downloads sheets to a `.json` file
+- Connection settings, request templates, and saved transforms live in **localStorage** — they are not included in the workbook file
 
 ---
 

@@ -8,15 +8,18 @@ ZbxWizz presents data as a multi-sheet workbook. Each sheet is an independent ta
 
 | Menu | What it does |
 |------|----------------|
-| **Environment** | **New** workspace · **Save** / **Load** workbook `.json` |
-| **Data** | Import CSV / XLS / Zabbix / JavaScript · Export CSV / XLS · Chart data |
-| **Table ops** | Add rows · Reorder columns |
-| **Zabbix ops** | **Pull** (enrich rows) · **Push** (create / update / delete) |
-| **Tools** | Script editor (advanced JavaScript) |
+| **File** | **New** workspace · **Save** / **Load** workbook `.json` |
+| **Data → Import** | **CSV** · **Excel** · **From Zabbix** · **From JavaScript** |
+| **Data → Export** | **CSV** · **Excel** · **Chart data** |
+| **Table** | **Add rows** · **Reorder columns** |
+| **Zabbix** | **Pull** (enrich rows) · **Push** (create / update / delete) |
+| **Tools** | **Script editor** (ad-hoc JavaScript) |
 | **Help** | In-app documentation · Zabbix API docs · Contact |
-| **Zabbix logo** | API URL, token, and bulk query mode |
+| **Zabbix logo / status** | API URL, token, and bulk query mode (**Connected** / **Not connected**) |
 
 Footer: sheet tabs, **New sheet**, save icon, and **Total / Selected / Visible** counters.
+
+An empty sheet also shows shortcut buttons for the four import paths (CSV, Excel, Zabbix, JavaScript).
 
 ---
 
@@ -24,21 +27,44 @@ Footer: sheet tabs, **New sheet**, save icon, and **Total / Selected / Visible**
 
 Each column header has a **column index** button that opens a menu:
 
-- **Filter** — empty / not empty / contains / does not contain / starts with / ends with / exact match
+- **Filter** — empty / not empty / contains / does not contain / starts with / ends with / exact match · unique-value picker · Apply / Clear
 - **Transform** — JavaScript expression editor (Ace) with preview
 - **Format as date/time** — applies `formatUnix(self)` to visible cells (mutates stored values)
 - **Sort** ascending / descending
-- Insert / delete column, resize
+- **Insert column** left / right · **Delete column** · **Resize column**
 
 Also:
 
 - Double-click a **field name** to rename the column
-- Double-click a **cell** to edit (finish with Ctrl+Enter or click away)
-- Click the **row number** to inspect the full row object (`data`, `lastResponse`, `lastError`, …)
-- Row checkbox selects the row for Pull / Push
-- Table hamburger (first header cell): copy visible/selected rows to a new sheet; delete selected/unselected
+- Double-click a **cell** to edit (finish with **Ctrl+Enter** or click away)
+- Click the **row number** for the row menu (see below)
+- Row checkbox selects the row for Pull / Push; header checkbox toggles all **visible** rows
+- Table hamburger (first header cell): **Add rows** · copy visible/selected to a new sheet · delete selected/unselected · **Clear errors**
 
 Column numbers are **0-based**. Empty trailing columns may appear as `col0`, `col1`, …
+
+Large sheets use **row virtualization** (only visible rows are rendered) so CSV/API imports with thousands of rows stay responsive.
+
+---
+
+## Row menu
+
+Open from the row number button:
+
+| Action | Behaviour |
+|--------|-----------|
+| **Row info** | JSON view of `flds`, `data`, `cols`, `lastResponse`, `lastError` |
+| **Duplicate row** | Clone the row |
+| **Delete row** | Remove the row |
+| **Insert empty row before / after** | Insert a blank row next to this one |
+
+---
+
+## Table menu
+
+**Table → Add rows** asks how many empty rows to append (same as the hamburger **Add rows** action).
+
+**Table → Reorder columns** opens a sortable list of field names; Save rewrites the header and every row to the new order.
 
 ---
 
@@ -56,7 +82,9 @@ The value dropdown lists unique values from that column for quick picks.
 
 **Multiple column filters combine with AND** — a row must pass every active filter to stay visible.
 
-Filters matter for transforms and for “select all visible”: expressions and bulk select ignore hidden rows.
+Filters matter for transforms and for “select all visible”: expressions and bulk select ignore hidden rows. Pull and Push also skip hidden rows even if they are selected.
+
+**Clear errors** (table hamburger) clears per-row error highlighting / `lastError` state after failed API calls.
 
 ---
 
@@ -83,6 +111,8 @@ From the table hamburger you can **copy visible** or **copy selected** rows into
 
 Pull and Push run only on rows that are **selected and visible**.
 
+The footer **save** icon forces a flush of the IndexedDB autosave.
+
 ---
 
 ## Persistence
@@ -106,23 +136,31 @@ Still used for:
 | Saved transforms | `transfo_*` |
 | Script editor drafts | `script`, `script_*` |
 
-### Environment Save / Load
+### File Save / Load
 
-- **Environment → Save** exports the workbook (sheets + data) to a downloadable `.json` file. It does **not** include URL, token, or templates.
-- **Environment → Load** replaces the workbook from that file and reloads the page.
+- **File → Save** exports the workbook (sheets + data) to a downloadable `.json` file. It does **not** include URL, token, or templates.
+- **File → Load** replaces the workbook from that file and reloads the page.
+- **File → New** clears the workbook (all sheets).
 
-Before risky Push/Delete runs, save an environment file and/or export CSV.
+Before risky Push/Delete runs, save a workbook file and/or export CSV/Excel.
 
 ---
 
 ## Script editor
 
-**Tools → Script editor** opens an Ace JavaScript editor for ad-hoc automation against the current session. Results appear in the debug area. Named scripts can be saved in localStorage.
+**Tools → Script editor** opens the **Script player**: an Ace JavaScript editor for ad-hoc automation against the current session.
 
-This is an advanced escape hatch — prefer column transforms and Pull/Push templates for repeatable work.
+| Control | Behaviour |
+|---------|-----------|
+| Editor | Ace with JS mode; draft restored from localStorage `script` |
+| **Play** | Runs the body as an `async` function (`eval`); return value (or thrown error) appears in the debug area |
+| Named scripts | Save / load scripts under `script_*` in localStorage |
+| `dbg(text)` | Append a line to the debug textarea while the script runs |
+
+Scripts can use the same session objects as transforms (`ws`, helpers such as `json` / `obj`, and anything else already in page scope). Prefer **column transforms** and **Pull/Push templates** for repeatable work; use the script editor for one-off exploration or multi-step glue.
 
 ---
 
-## Startup disclaimer
+## Responsibility banner
 
-First-time visitors see a warning about Push/Delete. Accepting remembers the choice in localStorage.
+The empty workbook area shows a short responsibility reminder (“with great power…”). There is no separate accept gate — Push/Delete still require confirmation dialogs when you run them.

@@ -114,8 +114,18 @@ ws.assets.lookup(flds.hostname, "hostname", "asset_id", false)
 
 ### `lookup2(terms, valueCol, regexp?, defaultOnEmpty?)`
 
-Multi-column exact match. `terms` is an object like `{ hostid: "1001", env: "prod" }`.
+Multi-column exact match. `terms` is an object of field → value pairs; every pair must match the same row.
 
+```javascript
+ws.assets.lookup2({ hostid: flds.hostid, env: "prod" }, "owner", false, "")
+```
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `terms` | object | e.g. `{ hostid: "1001", env: "prod" }` |
+| `valueCol` | number or string | Column to return from the matched row |
+| `regexp` | boolean | Treat term values as regex (default: exact, case-insensitive) |
+| `defaultOnEmpty` | any | Returned when no row matches |
 ---
 
 ## Row object (in scripts / debug)

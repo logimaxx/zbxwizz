@@ -1,18 +1,20 @@
 # Import & export
 
-Bring data into sheets, then export CSV or XLS, or chart frequencies. Writing back to Zabbix is covered in [Zabbix operations](zabbix-operations.md).
+Bring data into sheets, then export CSV or Excel, or chart frequencies. Writing back to Zabbix is covered in [Zabbix operations](zabbix-operations.md).
+
+Menu paths below match the app: **Data → Import → …** and **Data → Export → …**. An empty sheet also exposes the same four import shortcuts as buttons.
 
 ---
 
 ## Import from Zabbix
 
-**Data → Import from Zabbix**
+**Data → Import → From Zabbix**
 
 Fetches via `{resource}.get` and loads the result into the **active sheet** (replacing its current data).
 
 | Field | Description |
 |-------|-------------|
-| **Resource** | API resource: `host`, `hostgroup`, `template`, `trigger`, `item`, `problem`, `event`, … |
+| **Resource** | API resource from the dropdown (`host`, `hostgroup`, `template`, `trigger`, `item`, `problem`, `event`, … — any Zabbix object type the API exposes) |
 | **Request editor** | JSON **params** only (not a full JSON-RPC envelope) |
 | **Templates** | Save/load named requests (localStorage) |
 | **Preview** | Compiles the template; green = valid JSON/JS, red = error |
@@ -66,11 +68,11 @@ See the [Zabbix API reference](https://www.zabbix.com/documentation/current/en/m
 
 ## Import from CSV
 
-**Data → Import CSV**
+**Data → Import → CSV**
 
 - File or pasted text, parsed with Papa Parse (`header: true`)
 - Header names become field names
-- Choose a target sheet (new or existing)
+- Choose a target sheet (new or existing); optional overwrite of an existing sheet
 
 Tips:
 
@@ -80,14 +82,14 @@ Tips:
 
 ---
 
-## Import from XLS
+## Import from Excel
 
-**Data → Import XLS**
+**Data → Import → Excel**
 
 - Accepts `.xls` / `.xlsx` (SheetJS)
 - Load the workbook, pick which Excel sheets to import
 - Each selected Excel sheet becomes a ZbxWizz sheet with the same name
-- Optional: overwrite/reset the existing workbook first
+- Optional: overwrite/reset existing sheets with the same names
 
 Useful for round-trips with Excel, or for onboarding inventories maintained as spreadsheets.
 
@@ -95,7 +97,7 @@ Useful for round-trips with Excel, or for onboarding inventories maintained as s
 
 ## Import from JavaScript
 
-**Data → Import from JavaScript**
+**Data → Import → From JavaScript**
 
 Write a script body that **returns an array of objects**. Keys of the first object become columns:
 
@@ -116,13 +118,13 @@ return Array.from({length: 10}, (_, i) => ({
 }));
 ```
 
-Use this for synthetic test data or reshaping sources before they hit the table. For cross-sheet logic, prefer transforms / the script editor after import — this importer evaluates a plain function body and loads the returned array.
+Use this for synthetic test data or reshaping sources before they hit the table. For cross-sheet logic, prefer transforms / the script editor after import — this importer evaluates a plain function body and loads the returned array. Named scripts can be saved like other request templates (`importJSTpl*`).
 
 ---
 
 ## Export to CSV
 
-**Data → Export to CSV**
+**Data → Export → CSV**
 
 | Option | Rows included |
 |--------|---------------|
@@ -134,9 +136,9 @@ You can also restrict which columns are exported. Output uses Papa Parse (quoted
 
 ---
 
-## Export to XLS
+## Export to Excel
 
-**Data → Export to XLS**
+**Data → Export → Excel**
 
 Builds a single `.xlsx` workbook (SheetJS) with one Excel worksheet per selected ZbxWizz sheet:
 
@@ -145,13 +147,13 @@ Builds a single `.xlsx` workbook (SheetJS) with one Excel worksheet per selected
 | Sheets | Multi-select; all sheets selected by default |
 | All / selected / visible records | Same row filters as CSV, applied **per sheet** |
 
-All columns of each sheet are included (header row even if a sheet has no rows). Sheet names are sanitized to Excel limits (31 characters; invalid characters replaced).
+All columns of each sheet are included (header row even if a sheet has no rows). Sheet names are sanitized to Excel limits (31 characters; invalid characters replaced). Download name: `export.xlsx`.
 
 ---
 
 ## Chart data
 
-**Data → Chart data**
+**Data → Chart data** (under Export)
 
 Builds a Chart.js view of the active sheet:
 
@@ -186,4 +188,4 @@ Select a template and remove it from the dialog when you no longer need it.
 
 ## Not yet available
 
-- Export JSON of the sheet alone (use **Environment → Save** for a full workbook export)
+- Export JSON of the sheet alone (use **File → Save** for a full workbook export)

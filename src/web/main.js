@@ -218,11 +218,18 @@ async function push_to_api(sheet, resource, operation, template,success=new Func
                     console.log("Request",req);
                     console.log("Template",template);
                     console.log("Data",data);
+                    err = true;
+                    row.set_error(e);
                     reject(e);
                     return;
                 }
                 reqArr.push({params:params,ctx:row})
             });
+
+            if (err) {
+                overlay.hide();
+                return;
+            }
 
             // perform request
             zbx.bulk_req(method,reqArr,
@@ -232,11 +239,15 @@ async function push_to_api(sheet, resource, operation, template,success=new Func
                  * @param {Row} row
                  */
                 (resp,row)=>{
-                    if(typeof resp.result!=="undefined" && resp.result.length===0)
-                        return row.set_error("Not found");
                     if(typeof resp.error!=="undefined")
                         return row.set_error(resp.error);
-                    row.lastResponse = resp;
+                    if(typeof resp.result!=="undefined") {
+                        if(Array.isArray(resp.result) && resp.result.length===0)
+                            return row.set_error("Not found");
+                        row.lastResponse = resp;
+                        return row.set_success();
+                    }
+                    row.set_error(resp);
                 },
                 /**
                  *
@@ -790,12 +801,35 @@ function load_transfo(src) {
 
 
 
-function save_session(stop=false) {
-    sheetManager.save();
-    
-    if(!stop) 
-        setTimeout(save_session, 60000);
+function mark_unsaved() {
+    newUnsavedData = true;
+    schedule_session_save();
 }
+
+let _sessionSaveTimer = null;
+function schedule_session_save(delay = 500) {
+    if (_sessionSaveTimer) clearTimeout(_sessionSaveTimer);
+    _sessionSaveTimer = setTimeout(() => {
+        _sessionSaveTimer = null;
+        if (!newUnsavedData) return;
+        save_session(true);
+    }, delay);
+}
+
+function save_session(stop=false) {
+    if (_sessionSaveTimer) {
+        clearTimeout(_sessionSaveTimer);
+        _sessionSaveTimer = null;
+    }
+    if (typeof sheetManager !== "undefined" && sheetManager)
+        sheetManager.save();
+    newUnsavedData = false;
+}
+
+window.addEventListener("beforeunload", () => {
+    if (newUnsavedData && typeof sheetManager !== "undefined" && sheetManager)
+        sheetManager.save();
+});
 
 
 
@@ -1316,7 +1350,6 @@ $("#sheetSelector").sortable({
 });
 
 var sheets = sheetManager.sheets;
-setTimeout(save_session, 60000);
 
 
 function import_from_zbx_modal(tpl) {

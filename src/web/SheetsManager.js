@@ -203,7 +203,15 @@ class SheetsManager {
         this.save();
         log("new list",this.#sheetsOrder);
 
-        this.activate_sheet(this.sheetsNames.pop());
+        const next = this.#sheetsOrder.length
+            ? this.#sheetsOrder[this.#sheetsOrder.length - 1]
+            : null;
+        if (next) {
+            this.activate_sheet(next);
+        } else {
+            this.#activeSheetName = null;
+            this.update_stats();
+        }
 
         return this;
     }

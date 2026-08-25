@@ -132,7 +132,8 @@ class Cell {
     set val(value) {
         this.#value = typeof value==="object" ? json(value) : value;
         this.#el.text(this.#value);
-        newUnsavedData = true;
+        if (typeof mark_unsaved === "function") mark_unsaved();
+        else newUnsavedData = true;
     }
 
     /**

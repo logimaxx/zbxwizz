@@ -292,7 +292,7 @@ class Row {
         this.#el.data("rowRef",this);
         this.#table = dataTable;
         Object.assign(this.data,record.data ?  record.data  : {});
-        if(!record.flds || !Object.keys(record.flds)) {
+        if(!record.flds || !Object.keys(record.flds).length) {
             record.flds = {};
             fields.forEach(fld=>record.flds[fld]=null);
         }
@@ -323,7 +323,7 @@ class Row {
      * @param err
      */
     set_error(err) {
-        this.#el.addClass("error");
+        this.#el.removeClass("success").addClass("error");
         this.lastError = err;
         this.hasError = true;
     }
@@ -332,8 +332,17 @@ class Row {
      * clear row error
      */
     unset_error() {
-        this.#el.removeClass("error");
+        this.#el.removeClass("error success");
         this.hasError = false;
+    }
+
+    /**
+     * show row as successful
+     */
+    set_success() {
+        this.#el.removeClass("error").addClass("success");
+        this.hasError = false;
+        this.lastError = null;
     }
 
     /**
@@ -352,7 +361,8 @@ class Row {
         this.#cellsData = record;
         this.#cells=[];
         fields.forEach((fld,colIdx)=>{
-            let cell = new Cell(this,colIdx,fld,(record[fld] ? record[fld] : "").toString());
+            let raw = record[fld];
+            let cell = new Cell(this,colIdx,fld,(raw != null ? raw : "").toString());
             this.#cells.push(cell);
             this.#cellsByFld[fld] = cell;
         });

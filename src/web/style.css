@@ -462,18 +462,37 @@ footer .addremove.btn-info:hover {
     flex-wrap: nowrap;
 }
 #top .app-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    margin-right: 0.75rem;
+    padding: 0.15rem 0;
+    line-height: 1;
+    white-space: nowrap;
+    user-select: none;
+    text-decoration: none !important;
+}
+#top .app-brand .logo-zbx {
+    display: inline-flex;
+    align-items: center;
+    background: #d40000;
+    color: #fff;
+    font-family: var(--font-sans);
+    font-weight: 800;
+    font-size: 0.8125rem;
+    letter-spacing: 0.05em;
+    padding: 0.3rem 0.45rem;
+    border-radius: 0.35rem;
+}
+#top .app-brand .logo-wizz {
     font-family: var(--font-sans);
     font-weight: 700;
-    font-size: 1rem;
+    font-size: 1.125rem;
     letter-spacing: -0.02em;
-    color: var(--header) !important;
-    margin-right: 0.75rem;
-    padding: 0.2rem 0;
-    user-select: none;
+    color: var(--text);
 }
-#top .app-brand:hover {
-    color: var(--accent-hover) !important;
-    text-decoration: none;
+#top .app-brand:hover .logo-wizz {
+    color: #d40000;
 }
 #top .navbar-toggler {
     border: 1px solid var(--border);

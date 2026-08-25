@@ -426,6 +426,8 @@ function transform_cell(cell, expr) {
     data.lastResponse = obj(json(cell.row.lastResponse));
     data.lastError = obj(json(cell.row.lastError));
     data.ws = sheetManager.sheets;
+    data.formatUnix = formatUnix;
+    data.parseUnixMs = parseUnixMs;
     
 
 

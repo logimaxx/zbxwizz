@@ -222,6 +222,27 @@ function obj(str) {
     return JSON.parse(str);
 }
 
+/**
+ * Parse a Zabbix-style Unix timestamp to milliseconds since epoch.
+ * Accepts seconds, or milliseconds when value > 1e12. Returns null if invalid.
+ */
+function parseUnixMs(value) {
+    if (value == null || value === "") return null;
+    let n = typeof value === "number" ? value : Number(String(value).trim());
+    if (!Number.isFinite(n) || n <= 0) return null;
+    return n > 1e12 ? n : n * 1000;
+}
+
+/**
+ * Convert a Unix timestamp (seconds or ms) to a locale date/time string.
+ * Empty or invalid values become "".
+ */
+function formatUnix(value) {
+    let ms = parseUnixMs(value);
+    if (ms == null) return "";
+    return new Date(ms).toLocaleString();
+}
+
 function dragable_modal(opts) {
     let tpl = `<div class="card draggableModal" id="draggableModal" style="position: absolute">
             <div class="card-header d-flex">

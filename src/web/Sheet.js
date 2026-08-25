@@ -66,6 +66,7 @@ class Sheet {
                 </form>
                 <div class="dropdown-divider"></div>
                 <a class="dropdown-item" href="#" onclick="$(this).parents('table').data().sheet.show_transform($(this).parents('th').data().col)"><i class="fa fa-cogs"></i> Transform</a>
+                <a class="dropdown-item" href="#" onclick="(function(el){let th=$(el).parents('th');let sheet=$(el).parents('table').data().sheet;confirm_modal('Convert this column to human-readable date/time? Stored and exported values will change.',function(){transform_col(sheet,th.data().col,'formatUnix(self)')});})(this)"><i class="fa fa-clock-o"></i> Format as date/time</a>
                 <div class="dropdown-divider"></div>
 
                 <a class="dropdown-item" href="#" onclick="$(this).parents('table').data().sheet.sort_col($(this).parents('th').attr('data-col'),'asc')" ><i class="fa fa-sort-asc"></i> Sort asc</a>

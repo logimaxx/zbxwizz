@@ -29,6 +29,7 @@
     - [Reorder columns](#reorder-columns)
   - [Exporting data](#exporting-data)
     - [Exporting data to CSV](#exporting-data-to-csv)
+    - [Charting data](#charting-data)
     - [Exporting data to Zabbix](#exporting-data-to-zabbix)
 
 ## Introduction
@@ -219,6 +220,7 @@ The JS code has access to the following variables and functions:
 - **ws.sheetName.lookup(lookupValue, lookupColumn, resultColumn)** - lookup a value in the lookupColumn and return the value from the resultColumn. The lookup column and result column can be either column names or column indices. When resultColumn is omitted the function will return the row object which can be further queried for the data.
 - **json({object})** - convert an object to a JSON string.
 - **obj({jsonString})** - convert a JSON string to an object.
+- **formatUnix(value)** - convert a Unix timestamp (seconds or milliseconds) to a locale date/time string. Empty or invalid values become blank. You can also use the column menu **Format as date/time** to apply this to all visible cells in a column.
 - **lastResult** - the result of the last executed request.
 - **lastError** - the error of the last executed request.
 - **data.csv** - the original data set of the row when it was first imported. Imutable
@@ -261,6 +263,10 @@ Go to **Table ops->Reorder columns** to open a window where columns order can be
 ### Exporting data to CSV
 
 To export data to a CSV file, you need to click the "Export CSV" menu item in the Data menu. You will be presented with a dialog where you can select the rows to be exported.
+
+### Charting data
+
+**Data → Chart data** opens a chart of the active sheet. Pick a category column for a bar or pie of the most common values (top 20), and optionally a clock column to histogram events by hour of day or calendar day. Charts use **visible** rows by default, so column filters apply — useful for top problems and busy notification periods after importing `problem` or `event` history.
 
 ### Exporting data to Zabbix
 

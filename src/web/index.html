@@ -48,6 +48,7 @@
 
                             <div class="dropdown-divider"></div>
                             <a class="dropdown-item" role="button"  href="#" onclick="prompt_save_data()">Export to CSV</a>
+                            <a class="dropdown-item" role="button" href="#" onclick="chart_modal()">Chart data</a>
                             <!-- <a class="dropdown-item" role="button" onclick="alert_modal('Not yet implemented')">Export JSON</a> -->
                         </div>
                     </li>
@@ -163,6 +164,57 @@
                 </div>
             </div>
             
+        </div>
+        <div id="chartDialog">
+            <div class="form-row">
+                <div class="col-md-3">
+                    <div class="form-group mb-2">
+                        <label class="mb-0 small">Records</label>
+                        <select name="records" class="custom-select custom-select-sm">
+                            <option value="visible" selected>visible</option>
+                            <option value="selected">selected</option>
+                            <option value="all">all</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group mb-2">
+                        <label class="mb-0 small">Category column</label>
+                        <select name="category" class="custom-select custom-select-sm"></select>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="form-group mb-2">
+                        <label class="mb-0 small">Chart type</label>
+                        <select name="chartType" class="custom-select custom-select-sm">
+                            <option value="bar" selected>bar</option>
+                            <option value="pie">pie</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="form-group mb-2">
+                        <label class="mb-0 small">Clock column</label>
+                        <select name="clock" class="custom-select custom-select-sm"></select>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="form-group mb-2">
+                        <label class="mb-0 small">Time bucket</label>
+                        <select name="bucket" class="custom-select custom-select-sm">
+                            <option value="hour" selected>hour of day</option>
+                            <option value="day">calendar day</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="small text-muted chart-meta mb-2"></div>
+            <div style="height: 240px; position: relative;">
+                <canvas class="freq-chart"></canvas>
+            </div>
+            <div class="time-chart-wrap mt-3" style="height: 220px; position: relative; display: none;">
+                <canvas class="time-chart"></canvas>
+            </div>
         </div>  
         <div id="tranformDialog" title="Transform">
             <label>
@@ -624,6 +676,7 @@
 <script src="../../node_modules/xlsx/dist/xlsx.full.min.js"></script>
 <script src="../../node_modules/ace-builds/src-min-noconflict/ace.js"></script>
 <script src="../../node_modules/ace-builds/src-min-noconflict/ext-language_tools.js"></script>
+<script src="../../node_modules/chart.js/dist/chart.umd.min.js"></script>
 
 <script src="./util.js"></script>
 <script src="./AppStorage.js"></script>
@@ -632,6 +685,7 @@
 <script src="./Row.js"></script>
 <script src="./Sheet.js"></script>
 <script src="./SheetsManager.js"></script>
+<script src="./ChartView.js"></script>
 <script src="./main.js"></script>
 
 <script>

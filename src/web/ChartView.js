@@ -89,6 +89,66 @@ const ChartView = (function () {
         return out;
     }
 
+    function downloadChartPng(chart, filename) {
+        if (!chart || !chart.canvas) return;
+        const src = chart.canvas;
+        const tmp = document.createElement("canvas");
+        tmp.width = src.width;
+        tmp.height = src.height;
+        const ctx = tmp.getContext("2d");
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(0, 0, tmp.width, tmp.height);
+        ctx.drawImage(src, 0, 0);
+        tmp.toBlob((blob) => {
+            if (blob) downloadBlob(blob, filename);
+        }, "image/png");
+    }
+
+    function exportChartsPng() {
+        if (!freqChart && !timeChart) {
+            alert_modal("Nothing to export — render a chart first.");
+            return;
+        }
+        if (freqChart) downloadChartPng(freqChart, "chart-category.png");
+        if (timeChart) downloadChartPng(timeChart, "chart-time.png");
+    }
+
+    function exportChartsCsv($el) {
+        const sheet = sheetManager.get_active();
+        if (!sheet) return;
+
+        const categoryField = $el.find("[name=category]").val();
+        const clockField = $el.find("[name=clock]").val();
+        const bucket = $el.find("[name=bucket]").val() || "hour";
+        const scope = $el.find("[name=records]").val() || "visible";
+        const pred = rowPredicate(scope);
+        const records = sheet.export(pred);
+        const parts = [];
+
+        if (categoryField) {
+            const freq = countFrequencies(records, categoryField, TOP_N);
+            parts.push(Papa.unparse(
+                freq.map((f) => ({ value: f.label, count: f.count })),
+                { quotes: true, header: true }
+            ));
+        }
+        if (clockField) {
+            const hist = bucketClock(records, clockField, bucket);
+            const rows = hist.labels.map((label, i) => ({
+                bucket: label,
+                count: hist.values[i],
+            }));
+            if (parts.length) parts.push("");
+            parts.push(Papa.unparse(rows, { quotes: true, header: true }));
+        }
+
+        if (!parts.length) {
+            alert_modal("Nothing to export — choose a category or clock column.");
+            return;
+        }
+        downloadBlob(parts.join("\n"), "chart-data.csv", "text/csv;charset=utf-8;");
+    }
+
     function renderCharts($el) {
         destroyCharts();
         const sheet = sheetManager.get_active();
@@ -218,6 +278,18 @@ const ChartView = (function () {
                     class: "primary",
                     action: (modal) => {
                         renderCharts(modal.find(".card-body").children().first());
+                    },
+                },
+                {
+                    text: "Export PNG",
+                    class: "secondary",
+                    action: () => exportChartsPng(),
+                },
+                {
+                    text: "Export CSV",
+                    class: "secondary",
+                    action: (modal) => {
+                        exportChartsCsv(modal.find(".card-body").children().first());
                     },
                 },
                 {

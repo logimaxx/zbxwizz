@@ -163,6 +163,8 @@ Builds a Chart.js view of the active sheet:
 
 Empty category values appear as `(empty)`. Unparseable clocks are counted in the chart meta line.
 
+**Export PNG** downloads the rendered chart(s) as images (`chart-category.png`, and `chart-time.png` when a clock column is set). **Export CSV** downloads the aggregated series (value/count and optional time buckets).
+
 Typical use after importing `problem` / `event` history: filter noise, then chart top problem names and busy hours. See [Examples](examples.md).
 
 ---

@@ -112,7 +112,7 @@ Templates are JS template literals:
 
 ## Charts
 
-**Data → Chart data** — top-20 category frequencies (bar/pie) and optional clock histograms (hour of day or calendar day). Uses visible rows by default.
+**Data → Chart data** — top-20 category frequencies (bar/pie) and optional clock histograms (hour of day or calendar day). Uses visible rows by default. Export as PNG or aggregated CSV from the dialog.
 
 ---
 

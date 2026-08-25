@@ -167,6 +167,24 @@ footer .nav-link{
     table-layout: fixed;
     width: 100%;
 }
+.dataTable tbody > tr.virt-row > td {
+    height: 28px;
+    max-height: 28px;
+    box-sizing: border-box;
+}
+.dataTable tbody > tr.virt-row > td.cell {
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.dataTable tbody > tr.virt-row > td.editing {
+    max-height: none;
+    height: auto;
+}
+.dataTable tbody > tr.virt-spacer > td {
+    border: none !important;
+    padding: 0 !important;
+    background: transparent !important;
+}
 .dataTable tbody td.editing{
     background: #0B0A09;
     color: greenyellow;

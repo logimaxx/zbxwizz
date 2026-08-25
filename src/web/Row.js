@@ -34,6 +34,11 @@ class Row {
     #cellsData;
     lastResponse = null;
 
+    #selected = false;
+    #hidden = false;
+    #mounted = false;
+    #statusClass = "";
+
     #rowMenu = `<a class="dropdown-item" role='button'  href='#' onclick="$(this).parents('tr').data().rowRef.info()">Row info</a>`+
         '<a class="dropdown-item" role="button"  href="#" onclick="$(this).parents(\'tr\').data().rowRef.duplicate()">Duplicate row</a>' +
         '<a class="dropdown-item" role="button"  href="#" onclick="confirm_modal(\'Are you sure you want to delete this record?\',()=>$(this).parents(\'tr\').data().rowRef.delete())">Delete row</a>' +
@@ -43,10 +48,14 @@ class Row {
 
     #btnCellTpl = `<button class="dropdown-toggle w-100" role="button" data-toggle="dropdown" aria-expanded="false">Tools</button><div class="dropdown-menu dropdown"></div>`;
     hide(){
-        this.#el.css("display","none");
+        if(this.#hidden) return;
+        this.#hidden = true;
+        this.#table.on_row_visibility_changed();
     }
     show(){
-        this.#el.css("display","");
+        if(!this.#hidden) return;
+        this.#hidden = false;
+        this.#table.on_row_visibility_changed();
     }
 
     /**
@@ -73,7 +82,7 @@ class Row {
      * @returns {boolean}
      */
     get is_hidden(){
-        return this.#el.css("display")==="none";
+        return this.#hidden;
     }
 
     /**
@@ -81,7 +90,11 @@ class Row {
      * @returns {boolean}
      */
     get isHidden() {
-        return this.#el.css("display")==="none";
+        return this.#hidden;
+    }
+
+    get isMounted() {
+        return this.#mounted;
     }
 
     /**
@@ -100,6 +113,7 @@ class Row {
     }
 
     set highlight(state) {
+        if(!this.#el) return;
         if(state) this.#el.addClass("highlight");
         else  this.#el.removeClass("highlight");
     }
@@ -216,14 +230,20 @@ class Row {
 
     select(checked=null,bulkUpdate = false) {
         if(checked!==null) {
-            this.#el.find("input[type=checkbox]")[0].checked = checked;
+            this.#selected = !!checked;
         }
-        // log(checked,this.#el.find("input[type=checkbox]")[0].checked)
-        if(this.#el.find("input[type=checkbox]")[0].checked) {
-            this.#el.addClass("selected");
+        else if(this.#el) {
+            this.#selected = this.#el.find("input[type=checkbox]")[0].checked;
         }
-        else {
-            this.#el.removeClass("selected");
+
+        if(this.#el) {
+            this.#el.find("input[type=checkbox]")[0].checked = this.#selected;
+            if(this.#selected) {
+                this.#el.addClass("selected");
+            }
+            else {
+                this.#el.removeClass("selected");
+            }
         }
         if(!bulkUpdate)
             sheetManager.update_stats();
@@ -234,7 +254,7 @@ class Row {
      * @return boolean
      */
     get isSelected() {
-        return  this.#el.hasClass("selected");
+        return this.#selected;
     }
 
     get idx() {
@@ -243,7 +263,7 @@ class Row {
 
     delete() {
         this.#table.delete_row(this.#rowIdx);
-        this.#el.remove();
+        this.unmount();
         this.#table.update_stats();
         save_session(true);
     }
@@ -287,9 +307,7 @@ class Row {
      * @param {Object} record 
      */
     constructor(dataTable,rowIdx,fields,record) {
-        this.#el = $("<tr>");
         this.#rowIdx = rowIdx;
-        this.#el.data("rowRef",this);
         this.#table = dataTable;
         Object.assign(this.data,record.data ?  record.data  : {});
         if(!record.flds || !Object.keys(record.flds).length) {
@@ -297,14 +315,41 @@ class Row {
             fields.forEach(fld=>record.flds[fld]=null);
         }
         this.data.csv = record.flds;
-        this.load_data(fields,record.flds).render();
+        this.load_data(fields,record.flds);
+    }
+
+    /**
+     * Build / refresh the row DOM (does not attach to tbody — Sheet virtualizer does).
+     * @returns {jquery}
+     */
+    mount() {
+        if(!this.#el) {
+            this.#el = $("<tr class='virt-row'>").data("rowRef",this);
+        }
+        this.render();
+        this.#mounted = true;
+        return this.#el;
+    }
+
+    /**
+     * Remove row DOM and free cell nodes.
+     */
+    unmount() {
+        if(!this.#mounted && !this.#el) return;
+        this.#cells.forEach(cell=>cell.unmount());
+        if(this.#el) {
+            this.#el.remove();
+            this.#el = null;
+        }
+        this.#mounted = false;
     }
 
     /**
      * show row as loading
      */
     set_loading() {
-        this.#el.addClass("loading");
+        this.#statusClass = "loading";
+        if(this.#el) this.#el.removeClass("error success").addClass("loading");
     }
 
     /**
@@ -323,33 +368,37 @@ class Row {
      * @param err
      */
     set_error(err) {
-        this.#el.removeClass("success").addClass("error");
+        this.#statusClass = "error";
         this.lastError = err;
         this.hasError = true;
+        if(this.#el) this.#el.removeClass("success loading").addClass("error");
     }
 
     /**
      * clear row error
      */
     unset_error() {
-        this.#el.removeClass("error success");
+        this.#statusClass = "";
         this.hasError = false;
+        if(this.#el) this.#el.removeClass("error success loading");
     }
 
     /**
      * show row as successful
      */
     set_success() {
-        this.#el.removeClass("error").addClass("success");
+        this.#statusClass = "success";
         this.hasError = false;
         this.lastError = null;
+        if(this.#el) this.#el.removeClass("error loading").addClass("success");
     }
 
     /**
      *
      */
     unset_loading() {
-        this.#el.removeClass("loading");
+        if(this.#statusClass === "loading") this.#statusClass = "";
+        if(this.#el) this.#el.removeClass("loading");
         return this;
     }
     /**
@@ -358,8 +407,10 @@ class Row {
      * @param record
      */
     load_data(fields,record) {
+        this.#cells.forEach(cell=>cell.unmount());
         this.#cellsData = record;
         this.#cells=[];
+        this.#cellsByFld = {};
         fields.forEach((fld,colIdx)=>{
             let raw = record[fld];
             let cell = new Cell(this,colIdx,fld,(raw != null ? raw : "").toString());
@@ -371,7 +422,17 @@ class Row {
 
     render() {
         let self = this;
-        $("<td>").appendTo(this.#el.empty()).append($("<div class=\"input-group-text\"><input type=\"checkbox\"></div>").find("input").on("change",()=>self.select()));
+        if(!this.#el) {
+            this.#el = $("<tr class='virt-row'>").data("rowRef",this);
+        }
+        this.#el.empty()
+            .removeClass("selected loading error success highlight")
+            .toggleClass("selected", this.#selected);
+        if(this.#statusClass) this.#el.addClass(this.#statusClass);
+
+        $("<td>").appendTo(this.#el).append($("<div class=\"input-group-text\"><input type=\"checkbox\"></div>").find("input")
+            .prop("checked", this.#selected)
+            .on("change",()=>self.select()));
         let menuCell = $("<td class='dropright dropdown'>").appendTo(this.#el)
             .append(this.#btnCellTpl);
 
@@ -381,6 +442,8 @@ class Row {
         }));
 
         this.#cells.forEach(cell=>cell.render().appendTo(this.#el));
+        this.#mounted = true;
+        return this.#el;
     }
 
     /**
@@ -402,13 +465,12 @@ class Row {
      *
      */
     remove() {
-        this.#el.remove();
         this.#table.remove_row(this.#rowIdx);
+        this.#table.schedule_virtual_update();
     }
     renumber(idx) {
         this.#rowIdx = idx;
-        //this.render();
-        this.#el.find("button").text(idx);
+        if(this.#el) this.#el.find("button").text(idx);
         return this;
     }
 }

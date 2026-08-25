@@ -107,8 +107,162 @@ class Sheet {
     scrollX=0;
     scrollY=0;
     #id;
+
+    /** Estimated row height for virtualization (px). Keep in sync with CSS. */
+    static ROW_HEIGHT = 28;
+    static OVERSCAN = 12;
+    #spacerTop = null;
+    #spacerBottom = null;
+    #mountedRows = new Set();
+    #virtScheduled = false;
+    #virtRange = { start: -1, end: -1 };
+    #visibleRowsCache = null;
+    #virtGen = 0;
+    #renderedGen = -1;
+
     unselect_cells() {
-        this.#tbody.find("td.active").removeClass("active")
+        if(this.#tbody) this.#tbody.find("td.active").removeClass("active")
+    }
+
+    #scroll_parent() {
+        return this.#container.parent();
+    }
+
+    #col_count() {
+        return 2 + this.#fields.length;
+    }
+
+    #invalidate_visible_cache() {
+        this.#visibleRowsCache = null;
+        this.#virtGen++;
+    }
+
+    /**
+     * Call when a row's hidden flag changes (filters).
+     */
+    on_row_visibility_changed() {
+        this.#invalidate_visible_cache();
+        this.schedule_virtual_update();
+    }
+
+    #get_visible_rows() {
+        if(!this.#visibleRowsCache) {
+            this.#visibleRowsCache = this.#rows.filter(row => !row.isHidden);
+        }
+        return this.#visibleRowsCache;
+    }
+
+    #make_spacer(height) {
+        return $("<tr class='virt-spacer'>").append(
+            $("<td>").attr("colspan", this.#col_count()).css({
+                height: height + "px",
+                padding: 0,
+                border: "none",
+                lineHeight: 0
+            })
+        );
+    }
+
+    /**
+     * Coalesce virtual updates to one per animation frame (filters / scroll).
+     */
+    schedule_virtual_update() {
+        if(this.#virtScheduled || !this.#tbody) return;
+        this.#virtScheduled = true;
+        requestAnimationFrame(()=>{
+            this.#virtScheduled = false;
+            this.update_virtual();
+        });
+    }
+
+    /**
+     * Mount only the rows that intersect the scroll viewport (+ overscan).
+     */
+    update_virtual() {
+        if(!this.#tbody) return;
+
+        const visibleRows = this.#get_visible_rows();
+        const total = visibleRows.length;
+        const scrollEl = this.#scroll_parent()[0];
+        if(!scrollEl) return;
+
+        const scrollTop = scrollEl.scrollTop;
+        const viewH = scrollEl.clientHeight || 600;
+        const rh = Sheet.ROW_HEIGHT;
+        const overscan = Sheet.OVERSCAN;
+
+        let start = Math.floor(scrollTop / rh) - overscan;
+        if(start < 0) start = 0;
+        let end = Math.ceil((scrollTop + viewH) / rh) + overscan;
+        if(end > total) end = total;
+
+        // Skip DOM work if the mounted window did not change
+        if(start === this.#virtRange.start && end === this.#virtRange.end
+            && this.#virtGen === this.#renderedGen
+            && this.#mountedRows.size === (end - start)
+            && this.#spacerTop && this.#spacerBottom) {
+            return;
+        }
+
+        const topH = start * rh;
+        const bottomH = Math.max(0, (total - end) * rh);
+        const nextRows = visibleRows.slice(start, end);
+        const nextSet = new Set(nextRows);
+
+        for(const row of [...this.#mountedRows]) {
+            if(!nextSet.has(row)) {
+                row.unmount();
+                this.#mountedRows.delete(row);
+            }
+        }
+
+        if(!this.#spacerTop || !this.#spacerTop.parent().length) {
+            this.#spacerTop = this.#make_spacer(topH);
+            this.#tbody.prepend(this.#spacerTop);
+        } else {
+            this.#spacerTop.children("td").attr("colspan", this.#col_count()).css("height", topH + "px");
+            if(this.#tbody.children().first()[0] !== this.#spacerTop[0]) {
+                this.#tbody.prepend(this.#spacerTop);
+            }
+        }
+
+        let anchor = this.#spacerTop;
+        for(const row of nextRows) {
+            if(!this.#mountedRows.has(row)) {
+                row.mount();
+                this.#mountedRows.add(row);
+            }
+            const $el = row.$el;
+            if($el && $el.prev()[0] !== anchor[0]) {
+                $el.insertAfter(anchor);
+            }
+            anchor = $el;
+        }
+
+        if(!this.#spacerBottom || !this.#spacerBottom.parent().length) {
+            this.#spacerBottom = this.#make_spacer(bottomH);
+            this.#tbody.append(this.#spacerBottom);
+        } else {
+            this.#spacerBottom.children("td").attr("colspan", this.#col_count()).css("height", bottomH + "px");
+            this.#tbody.append(this.#spacerBottom);
+        }
+
+        this.#virtRange = { start, end };
+        this.#renderedGen = this.#virtGen;
+    }
+
+    #clear_virtual() {
+        for(const row of this.#mountedRows) {
+            row.unmount();
+        }
+        this.#mountedRows.clear();
+        this.#spacerTop = null;
+        this.#spacerBottom = null;
+        this.#virtRange = { start: -1, end: -1 };
+        this.#visibleRowsCache = null;
+        this.#virtGen++;
+        this.#renderedGen = -1;
+        if(this.#tbody) this.#tbody.empty();
     }
 
     /**
@@ -151,15 +305,15 @@ class Sheet {
         if (typeof rowIdx !== "number") rowIdx = this.#rows.length;
         let row = new Row(this, rowIdx, fields, record || {});
         if (rowIdx >= this.#rows.length) {
-            this.#tbody.append(row.$el);
             this.#rows.push(row);
         } else {
-            row.$el.insertBefore(this.#rows[rowIdx].$el);
             this.#rows.splice(rowIdx, 0, row);
             for (let i = rowIdx + 1; i < this.#rows.length; i++) {
                 this.#rows[i].renumber(i);
             }
         }
+        this.#invalidate_visible_cache();
+        this.schedule_virtual_update();
         this.update_stats();
         save_session(true);
         return row;
@@ -301,10 +455,17 @@ class Sheet {
     }
 
     delete_row(idx) {
+        const removed = this.#rows[idx];
+        if(removed) {
+            this.#mountedRows.delete(removed);
+            removed.unmount();
+        }
         this.#rows.splice(idx,1);
         for(let i=idx;i<this.#rows.length;i++) {
             this.#rows[i].renumber(i);
         }
+        this.#invalidate_visible_cache();
+        this.schedule_virtual_update();
         save_session(true)
     }
 
@@ -314,27 +475,24 @@ class Sheet {
      */
     duplicate_row(row) {
         let newRow = new Row(this,row.idx+1,this.fields,row.export());
-        newRow.$el.insertAfter(row.$el);
         this.#rows.splice(row.idx+1,0,newRow);
         for(let i=row.idx+1;i<this.#rows.length;i++) {
             this.#rows[i].renumber(i);
         }
+        this.#invalidate_visible_cache();
+        this.schedule_virtual_update();
         save_session(true)
     }
     insert_row(idx,where){
 
-        let tmp = this.#rows[idx];
-
         if(where==="before") {
             let newRow = new Row(this,idx,this.fields,{});
             this.#rows.splice(idx,0,newRow);
-            newRow.$el.insertBefore(tmp.$el);
 
         }
         else if(where==="after") {
             let newRow = new Row(this,idx+1,this.fields,{});
             this.#rows.splice(idx+1,0,newRow);
-            newRow.$el.insertAfter(tmp.$el);
         }
         else
             return;
@@ -343,9 +501,12 @@ class Sheet {
         for(let i=idx;i<this.#rows.length;i++) {
             this.#rows[i].renumber(i);
         }
+        this.#invalidate_visible_cache();
+        this.schedule_virtual_update();
         save_session(true)
     }
     #setup(empty=true){
+        this.#clear_virtual();
         this.#container.removeData("dt").data("dt",this).empty();
         if(empty)
             return $("#emptyDataTable").clone(true).appendTo(this.#container);
@@ -382,7 +543,13 @@ class Sheet {
      * @returns {Sheet}
      */
     remove_row(idx) {
+        const row = this.#rows[idx];
+        if(row) {
+            this.#mountedRows.delete(row);
+            row.unmount();
+        }
         this.#rows.splice(idx,1);
+        this.#invalidate_visible_cache();
         return this;
     }
 
@@ -427,9 +594,13 @@ class Sheet {
      * @returns DataTable
      */
     reset() {
+        this.#clear_virtual();
         this.#container.empty();
         this.#rows = [];
         this.#fields = [];
+        this.#el = null;
+        this.#thead = null;
+        this.#tbody = null;
         return this;
     }
 
@@ -469,13 +640,13 @@ class Sheet {
         return new Promise(((resolve) => {
             this.render_header(fields);
 
-            // render data
-            this.#tbody.empty();
+            this.#rows = [];
+            this.#mountedRows.clear();
+            this.#invalidate_visible_cache();
             records.forEach((record,rowIdx)=>{
-                let row = new Row(this,rowIdx,fields,record);
-                this.#tbody.append(row.$el);
-                this.#rows.push(row);
+                this.#rows.push(new Row(this,rowIdx,fields,record));
             });
+            this.update_virtual();
             this.save();
             this.update_stats();
             resolve();
@@ -533,29 +704,19 @@ class Sheet {
         colNo = parseInt(colNo);
         if(["asc","desc"].indexOf(direction)===-1) throw "Invalid direction";
 
-        let vals = this.col(colNo,true).sort();
-        if(direction==="desc") vals.reverse();
-
         overlay.show();
         setTimeout(() => {
-            vals.forEach((val,idx)=>{
-                for(let i = idx; i<this.#rows.length; i++) {
-                    if(this.#rows[i].cell(colNo).val===val) {
-                        let row = this.#rows[i];
-                        
-                        if(idx===0){
-                            this.#rows[i].$el.insertBefore(this.#rows[0].$el);
-                        }
-                        else {
-                            this.#rows[i].$el.insertAfter(this.#rows[idx-1].$el)
-                        }
-                        this.#rows.splice(i,1);
-                        this.#rows.splice(idx,0,row);
-                        row.renumber(idx);
-                        break;
-                    }
-                }
+            const dir = direction === "asc" ? 1 : -1;
+            this.#rows.sort((a, b) => {
+                const va = a.cell(colNo).val;
+                const vb = b.cell(colNo).val;
+                if(va < vb) return -1 * dir;
+                if(va > vb) return 1 * dir;
+                return 0;
             });
+            this.#renumber_rows();
+            this.#clear_virtual();
+            this.update_virtual();
             overlay.hide();
         }, 400);
         
@@ -588,9 +749,10 @@ class Sheet {
                             log(flds);
                             sheet.render_header(flds,flds.length);
                             sheet.rows.forEach(row=>{
-                                // log(row.cellsData);
-                                row.load_data(flds,row.cellsData).render();
+                                row.load_data(flds,row.cellsData);
                             });
+                            sheet.#clear_virtual();
+                            sheet.update_virtual();
                             overlay.hide();
                         },300);
                     },
@@ -676,9 +838,10 @@ class Sheet {
                 let start = sheet.rows.length;
                 for(let rowIdx=start;rowIdx<start+el.find("input").val()*1;rowIdx++) {
                     let row = new Row(sheet,rowIdx,sheet.fields,{});
-                    sheet.#tbody.append(row.$el);
                     sheet.rows.push(row);
                 }
+                sheet.#invalidate_visible_cache();
+                sheet.schedule_virtual_update();
                 sheet.update_stats();
                 save_session(true);
                 modal.remove();
@@ -742,11 +905,12 @@ class Sheet {
             log(flds);
             this.render_header(flds, flds.length);
             this.rows.forEach(row => {
-                // log(row.cellsData);
                 let data = row.cellsData;
                 delete data[fldName];
-                row.load_data(flds, data).render();
+                row.load_data(flds, data);
             });
+            this.#clear_virtual();
+            this.update_virtual();
             overlay.hide();
         },200);
         return this;
@@ -777,11 +941,12 @@ class Sheet {
             setTimeout(()=> {
                 this.render_header(flds, flds.length);
                 this.rows.forEach(row => {
-                    // log(row.cellsData);
                     let data = row.cellsData;
                     data[newFldName] = "";
-                    row.load_data(flds, data).render();
+                    row.load_data(flds, data);
                 });
+                this.#clear_virtual();
+                this.update_virtual();
                 overlay.hide();
                 resolve(pos);
             },200);
@@ -842,8 +1007,9 @@ class Sheet {
             if(this.rows[i].isSelected)
                 this.rows[i].remove();
         }
-        this.rows.forEach((row,idx)=>row.renumber(idx));
         this.#renumber_rows();
+        this.#clear_virtual();
+        this.update_virtual();
         this.update_stats();
         save_session(true);
     }
@@ -856,8 +1022,9 @@ class Sheet {
             if(!this.rows[i].isSelected)
                 this.rows[i].remove();
         }
-        this.rows.forEach((row,idx)=>row.renumber(idx));
         this.#renumber_rows();
+        this.#clear_virtual();
+        this.update_virtual();
         this.update_stats();
         save_session(true);
     }

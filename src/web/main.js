@@ -523,6 +523,7 @@ function filter_rows(form,clear=false) {
 
     if(clear)
         th.removeClass("filterActive");
+    dt.schedule_virtual_update();
     sheetManager.update_stats();
 
 }

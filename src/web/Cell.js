@@ -28,7 +28,7 @@ class Cell {
      *
      */
     select(){
-        if(this.#el.attr("contenteditable")) return;
+        if(!this.#el || this.#el.attr("contenteditable")) return;
         let toggled = this.#el.hasClass("active");
         this.#rowRef.table.unselect_cells();
         if(!toggled) this.#el.addClass("active");
@@ -51,12 +51,13 @@ class Cell {
     }
 
     edit() {
-        if(this.#el.attr('contenteditable')) return;
+        if(!this.#el || this.#el.attr('contenteditable')) return;
         this.#el.attr('contenteditable',true).addClass("editing").removeClass("active").focus();
         document.getSelection().removeAllRanges();
         this.#el.data("oldval",this.#el.text());
     }
     finish_edit() {
+        if(!this.#el) return;
         this.#el.removeAttr("contenteditable").removeClass("editing");
         this.#value = this.#el.text();
         this.#el.removeData("oldval");
@@ -73,7 +74,19 @@ class Cell {
         this.#colIdx = col;
         this.#field = fld;
         this.#value = value;
-        this.render();
+    }
+
+    /**
+     * Detach DOM node (used by row virtualization).
+     */
+    unmount() {
+        if(this.#el && this.#el.hasClass("editing")) {
+            this.finish_edit();
+        }
+        if(this.#el) {
+            this.#el.remove();
+            this.#el = null;
+        }
     }
 
     /**
@@ -131,7 +144,7 @@ class Cell {
     }
     set val(value) {
         this.#value = typeof value==="object" ? json(value) : value;
-        this.#el.text(this.#value);
+        if(this.#el) this.#el.text(this.#value);
         if (typeof mark_unsaved === "function") mark_unsaved();
         else newUnsavedData = true;
     }

@@ -44,10 +44,16 @@ class SheetsManager {
         let self = this;
         this.#sheetsContainer = $(sheetsContainer).on("scroll",()=>{
             let sheet = self.get_active();
+            if(!sheet) return;
             sheet.scrollY = self.#sheetsContainer.scrollTop();
             sheet.scrollX = self.#sheetsContainer.scrollLeft();
+            sheet.schedule_virtual_update();
         });
         this.#tabsContainer = $(tabsContainer);
+        $(window).on("resize", ()=>{
+            let sheet = self.get_active();
+            if(sheet) sheet.schedule_virtual_update();
+        });
     }
 
     async init() {
@@ -95,7 +101,8 @@ class SheetsManager {
             if(activeSheet)
                 this.#sheetsContainer.scrollTop(activeSheet.scrollY).scrollLeft(activeSheet.scrollX);
             //this.save(true);
-            this.update_stats();    
+            this.update_stats();
+            if(activeSheet) activeSheet.schedule_virtual_update();
         }
         catch (e) {
             log(e)
